@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +34,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [attemptsLeft, setAttemptsLeft] = useState<number>(5);
 
   const templates: Template[] = [
     {
@@ -78,6 +79,19 @@ const Dashboard = () => {
     fetchInterviews();
   }, [user]);
 
+  useEffect(() => {
+    if (user) {
+      const fetchProfile = async () => {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setAttemptsLeft(docSnap.data().attemptsLeft ?? 5);
+        }
+      };
+      fetchProfile();
+    }
+  }, [user]);
+
   const fetchInterviews = async () => {
     if (!user) return;
 
@@ -106,7 +120,31 @@ const Dashboard = () => {
   };
 
   const startInterview = async (template: Template) => {
-    if (!user) return;
+    if (attemptsLeft <= 0) {
+      toast({
+        title: "No Attempts Left",
+        description: "You have used all your free interview attempts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      // Create the document if it doesn't exist
+      await setDoc(userRef, {
+        attemptsLeft: 5,
+        totalInterviews: 0,
+        completed: 0,
+        averageScore: 0
+      });
+    }
+
+    await updateDoc(userRef, {
+      attemptsLeft: attemptsLeft - 1,
+    });
+    setAttemptsLeft(attemptsLeft - 1);
 
     try {
       const interviewData = {
@@ -399,6 +437,19 @@ const Dashboard = () => {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Attempts Left Card */}
+        <div className="mt-12">
+          <Card>
+            <CardHeader>
+              <CardTitle>Attempts Left</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{attemptsLeft}</div>
+              <div className="text-gray-500 text-sm">Free interview attempts remaining</div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

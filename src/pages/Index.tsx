@@ -76,6 +76,7 @@ const Index = () => {
                       navigate('/login');
                     }}
                     variant="outline"
+                    className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
                   >
                     Logout
                   </Button>
