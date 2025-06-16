@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlusCircle, Play, Calendar, Briefcase, User, LogOut, Clock, Trophy, TrendingUp } from 'lucide-react';
+import { PlusCircle, Play, Calendar, Briefcase, User, LogOut, Clock, Trophy, TrendingUp, Home } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Interview {
@@ -203,6 +203,17 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* --- Add Back to Home Button Here --- */}
+              <Button
+                onClick={() => navigate('/')}
+                variant="outline"
+                size="sm"
+                className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+              {/* --- End Add --- */}
               <div className="flex items-center space-x-3 bg-gray-50 rounded-full px-4 py-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`} />

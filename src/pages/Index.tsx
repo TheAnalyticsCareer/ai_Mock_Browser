@@ -17,7 +17,7 @@ import {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth(); // <-- add logout here
 
   const features = [
     {
@@ -63,12 +63,23 @@ const Index = () => {
             </div>
             <div className="flex items-center space-x-4">
               {user ? (
-                <Button
-                  onClick={() => navigate('/dashboard')}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Go to Dashboard
-                </Button>
+                <>
+                  <Button
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Go to Dashboard
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await logout();
+                      navigate('/login');
+                    }}
+                    variant="outline"
+                  >
+                    Logout
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button
@@ -221,6 +232,85 @@ const Index = () => {
         </div>
       </section>
 
+      
+      {/* Pricing Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-100 to-purple-100">
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Choose Your Plan
+          </h2>
+          <p className="text-center text-gray-600 mb-10">
+            Start for free or upgrade for unlimited practice sessions
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Free Plan */}
+            <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center border-2 border-blue-200">
+              <h3 className="text-xl font-semibold mb-2">Free</h3>
+              <div className="text-4xl font-bold mb-1">$0</div>
+              <div className="text-gray-500 mb-4">forever</div>
+              <ul className="text-gray-700 mb-6 space-y-2 text-sm">
+                <li>3 AI interview sessions</li>
+                <li>Basic feedback reports</li>
+                <li>Voice interaction</li>
+                <li>Video interview simulation</li>
+                <li>Progress tracking</li>
+              </ul>
+              <Button
+                className="w-full py-2 px-4 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                onClick={() => navigate('/signup')}
+              >
+                Get Started Free
+              </Button>
+            </div>
+            {/* Monthly Plan */}
+            <div className="bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center border-4 border-purple-400 relative">
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow">
+                Most Popular
+              </span>
+              <h3 className="text-xl font-semibold mb-2">Monthly</h3>
+              <div className="text-4xl font-bold mb-1">$19</div>
+              <div className="text-gray-500 mb-4">per month</div>
+              <ul className="text-gray-700 mb-6 space-y-2 text-sm">
+                <li>Unlimited AI interviews</li>
+                <li>Advanced feedback & analytics</li>
+                <li>Multiple role templates</li>
+                <li>Priority voice processing</li>
+                <li>Custom interview scenarios</li>
+                <li>Email support</li>
+              </ul>
+              <Button
+                className="w-full py-2 px-4 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition"
+                onClick={() => navigate('/signup')}
+              >
+                Start Monthly Plan
+              </Button>
+            </div>
+            {/* Yearly Plan */}
+            <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center border-2 border-blue-200">
+              <h3 className="text-xl font-semibold mb-2">Yearly</h3>
+              <div className="text-4xl font-bold mb-1">$199</div>
+              <div className="text-gray-500 mb-4">per year</div>
+              <ul className="text-gray-700 mb-6 space-y-2 text-sm">
+                <li>Everything in Monthly</li>
+                <li><span className="font-semibold text-green-600">Save $29 per year</span></li>
+                <li>Premium interview scenarios</li>
+                <li>Detailed performance analytics</li>
+                <li>Priority customer support</li>
+                <li>1-on-1 coaching session</li>
+              </ul>
+              <Button
+                className="w-full py-2 px-4 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                onClick={() => navigate('/signup')}
+              >
+                Choose Yearly
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
       {/* CTA Section */}
       <section className="py-20 bg-blue-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
@@ -242,6 +332,9 @@ const Index = () => {
           </Button>
         </div>
       </section>
+
+
+
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
