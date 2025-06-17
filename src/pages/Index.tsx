@@ -58,8 +58,13 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <Briefcase className="h-8 w-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">AI Interview Coach</h1>
+              <img
+                src="https://d502jbuhuh9wk.cloudfront.net/logos/6677da88a7c70751b1bf34a8.png?v=1"
+                alt="Logo"
+                className="h-10 w-10 object-contain"
+              />
+             
+              <h1 className="text-2xl font-bold text-gray-900">Analytics Career</h1>
             </div>
             <div className="flex items-center space-x-4">
               {user ? (
@@ -342,12 +347,16 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <Briefcase className="h-6 w-6 text-blue-400" />
-              <span className="text-lg font-semibold">AI Interview Coach</span>
+              <img
+                src="https://d502jbuhuh9wk.cloudfront.net/logos/6677da88a7c70751b1bf34a8.png?v=1"
+                alt="Logo"
+                className="h-10 w-10 object-contain"
+              />
+              <span className="text-lg font-semibold">Analytics Career</span>
             </div>
             
             <div className="text-sm text-gray-400">
-              © 2024 AI Interview Coach. All rights reserved.
+              © 2025 Analytics Career. All rights reserved.
             </div>
           </div>
         </div>

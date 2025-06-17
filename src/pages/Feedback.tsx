@@ -264,7 +264,11 @@ const Feedback = () => {
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
-              <Briefcase className="h-6 w-6 text-blue-600" />
+             <img
+                src="https://d502jbuhuh9wk.cloudfront.net/logos/6677da88a7c70751b1bf34a8.png?v=1"
+                alt="Logo"
+                className="h-10 w-10 object-contain"
+              />
               <h1 className="text-xl font-semibold text-gray-900">AI-Generated Interview Analysis</h1>
             </div>
             <div className="flex items-center space-x-2">
