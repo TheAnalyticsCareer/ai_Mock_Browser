@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mic } from 'lucide-react';
 
@@ -7,6 +8,14 @@ interface TranscriptPanelProps {
 }
 
 const TranscriptPanel = ({ transcript, isInterviewActive }: TranscriptPanelProps) => {
+  const transcriptRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (transcriptRef.current) {
+      transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
+    }
+  }, [transcript]);
+
   return (
     <div className="w-full md:w-96 bg-gray-800 border-l border-gray-700 flex flex-col h-full min-h-[400px] max-h-full">
       <div className="p-4 border-b border-gray-700">
@@ -14,7 +23,10 @@ const TranscriptPanel = ({ transcript, isInterviewActive }: TranscriptPanelProps
         <p className="text-sm text-gray-400">Real-time conversation</p>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div
+        ref={transcriptRef}
+        className="flex-1 overflow-y-auto p-4 space-y-3"
+      >
         {transcript.length === 0 ? (
           <div className="text-center py-8">
             <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
