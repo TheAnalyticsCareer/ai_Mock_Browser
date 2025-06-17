@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,13 @@ const Index = () => {
     "Voice and video practice",
     "24/7 availability"
   ];
+
+  useEffect(() => {
+    if (window.location.hash === '#pricing') {
+      const el = document.getElementById('pricing');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -239,107 +247,88 @@ const Index = () => {
       </section>
 
       
-      {/* Pricing Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-100 to-purple-100">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Choose Your Plan
-          </h2>
-          <p className="text-center text-gray-600 mb-10">
-            Start for free or upgrade for unlimited practice sessions
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Free Plan */}
-            <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center border-2 border-blue-200">
-              <h3 className="text-xl font-semibold mb-2">Free</h3>
-              <div className="text-4xl font-bold mb-1">$0</div>
-              <div className="text-gray-500 mb-4">forever</div>
-              <ul className="text-gray-700 mb-6 space-y-2 text-sm">
-                <li>3 AI interview sessions</li>
-                <li>Basic feedback reports</li>
-                <li>Voice interaction</li>
-                <li>Video interview simulation</li>
-                <li>Progress tracking</li>
-              </ul>
-              <Button
-                className="w-full py-2 px-4 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
-                onClick={() => navigate('/signup')}
-              >
-                Get Started Free
-              </Button>
-            </div>
-            {/* Monthly Plan */}
-            <div className="bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center border-4 border-purple-400 relative">
-              <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow">
-                Most Popular
-              </span>
-              <h3 className="text-xl font-semibold mb-2">Monthly</h3>
-              <div className="text-4xl font-bold mb-1">$19</div>
-              <div className="text-gray-500 mb-4">per month</div>
-              <ul className="text-gray-700 mb-6 space-y-2 text-sm">
-                <li>Unlimited AI interviews</li>
-                <li>Advanced feedback & analytics</li>
-                <li>Multiple role templates</li>
-                <li>Priority voice processing</li>
-                <li>Custom interview scenarios</li>
-                <li>Email support</li>
-              </ul>
-              <Button
-                className="w-full py-2 px-4 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition"
-                onClick={() => navigate('/signup')}
-              >
-                Start Monthly Plan
-              </Button>
-            </div>
-            {/* Yearly Plan */}
-            <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center border-2 border-blue-200">
-              <h3 className="text-xl font-semibold mb-2">Yearly</h3>
-              <div className="text-4xl font-bold mb-1">$199</div>
-              <div className="text-gray-500 mb-4">per year</div>
-              <ul className="text-gray-700 mb-6 space-y-2 text-sm">
-                <li>Everything in Monthly</li>
-                <li><span className="font-semibold text-green-600">Save $29 per year</span></li>
-                <li>Premium interview scenarios</li>
-                <li>Detailed performance analytics</li>
-                <li>Priority customer support</li>
-                <li>1-on-1 coaching session</li>
-              </ul>
-              <Button
-                className="w-full py-2 px-4 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
-                onClick={() => navigate('/signup')}
-              >
-                Choose Yearly
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <section id="pricing" className="py-24 bg-gradient-to-br from-blue-50 to-purple-100">
+  <div className="max-w-6xl mx-auto px-6">
+    <h2 className="text-4xl font-extrabold text-center mb-3 bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
+      Choose Your Plan
+    </h2>
+    <p className="text-center text-gray-600 mb-14 text-lg">
+      Start for free, or upgrade for unlimited AI interview practice
+    </p>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      {/* Free Plan */}
+      <div className="bg-white rounded-3xl shadow-lg p-8 border border-blue-300 hover:shadow-2xl transition-all duration-300">
+        <h3 className="text-2xl font-semibold text-blue-700 mb-3 text-left">Free</h3>
+        <div className="text-5xl font-bold mb-1 text-left">$0</div>
+        <div className="text-gray-500 mb-6 text-left">Forever</div>
+        <ul className="text-gray-700 mb-8 space-y-2 text-sm text-left leading-relaxed">
+          <li>✅ 3 AI interview sessions</li>
+          <li>✅ Basic feedback reports</li>
+          <li>✅ Voice interaction</li>
+          <li>✅ Video interview simulation</li>
+          <li>✅ Progress tracking</li>
+        </ul>
+        <Button
+          className="w-full py-3 px-5 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+          onClick={() => navigate('/signup')}
+        >
+          Get Started Free
+        </Button>
+      </div>
+
+      {/* Monthly Plan - Highlighted */}
+      <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-purple-500 relative hover:scale-[1.03] transition-transform duration-300">
+        <span className="absolute -top-5 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-4 py-1 rounded-full font-bold shadow">
+          Most Popular
+        </span>
+        <h3 className="text-2xl font-semibold text-purple-700 mb-3 text-left">Monthly</h3>
+        <div className="text-5xl font-bold mb-1 text-left">$19</div>
+        <div className="text-gray-500 mb-6 text-left">Per Month</div>
+        <ul className="text-gray-700 mb-8 space-y-2 text-sm text-left leading-relaxed">
+          <li>✅ Unlimited AI interviews</li>
+          <li>✅ Advanced feedback & analytics</li>
+          <li>✅ Multiple role templates</li>
+          <li>✅ Priority voice processing</li>
+          <li>✅ Custom interview scenarios</li>
+          <li>✅ Email support</li>
+        </ul>
+        <Button
+          className="w-full py-3 px-5 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition"
+          onClick={() => navigate('/signup')}
+        >
+          Start Monthly Plan
+        </Button>
+      </div>
+
+      {/* Yearly Plan */}
+      <div className="bg-white rounded-3xl shadow-lg p-8 border border-blue-300 hover:shadow-2xl transition-all duration-300">
+        <h3 className="text-2xl font-semibold text-blue-700 mb-3 text-left">Yearly</h3>
+        <div className="text-5xl font-bold mb-1 text-left">$199</div>
+        <div className="text-gray-500 mb-6 text-left">Per Year</div>
+        <ul className="text-gray-700 mb-8 space-y-2 text-sm text-left leading-relaxed">
+          <li>✅ Everything in Monthly</li>
+          <li>✅ <span className="text-green-600 font-medium">Save $29 per year</span></li>
+          <li>✅ Premium interview scenarios</li>
+          <li>✅ Detailed performance analytics</li>
+          <li>✅ Priority customer support</li>
+          <li>✅ 1-on-1 coaching session</li>
+        </ul>
+        <Button
+          className="w-full py-3 px-5 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+          onClick={() => navigate('/signup')}
+        >
+          Choose Yearly
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
 
 
 
-      {/* CTA Section */}
-      <section className="py-20 bg-blue-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h3 className="text-4xl font-bold text-white mb-6">
-            Ready to Ace Your Next Interview?
-          </h3>
-          <p className="text-xl text-blue-100 mb-8">
-            Join thousands of professionals who have improved their interview skills 
-            and landed their dream jobs.
-          </p>
-          
-          <Button
-            onClick={() => navigate(user ? '/dashboard' : '/signup')}
-            size="lg"
-            className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
-          >
-            Start Your Free Practice Session
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
-      </section>
 
-
+     
 
 
       {/* Footer */}

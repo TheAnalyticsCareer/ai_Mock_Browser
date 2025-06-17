@@ -279,6 +279,33 @@ const Dashboard = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Attempts Left Section - Move to Top */}
+        <div className="mb-8 flex justify-end">
+          <Card className="w-full md:w-1/3 bg-gradient-to-r from-yellow-100 to-yellow-50 border-0 shadow-md">
+            <CardContent className="flex items-center justify-between p-6">
+              <div>
+                <CardTitle className="text-lg text-yellow-800 mb-1">Attempts Left</CardTitle>
+                <div className="text-3xl font-bold text-yellow-700">{attemptsLeft}</div>
+                <div className="text-gray-500 text-sm">Free interview attempts remaining</div>
+              </div>
+              <div className="flex items-center">
+                {attemptsLeft > 0 ? (
+                  <Badge className="bg-yellow-200 text-yellow-800 text-base px-4 py-2 rounded-full">
+                    Available
+                  </Badge>
+                ) : (
+                  <Button
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full"
+                    onClick={() => navigate('/#pricing')}
+                  >
+                    Buy
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Welcome Section with Stats */}
         <div className="mb-12">
           <div className="text-center mb-8">
@@ -440,19 +467,6 @@ const Dashboard = () => {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Attempts Left Card */}
-        <div className="mt-12">
-          <Card>
-            <CardHeader>
-              <CardTitle>Attempts Left</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{attemptsLeft}</div>
-              <div className="text-gray-500 text-sm">Free interview attempts remaining</div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
