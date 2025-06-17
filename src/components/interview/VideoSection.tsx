@@ -88,8 +88,12 @@ const VideoSection = ({
       {/* AI Interviewer Placeholder */}
       <div className="absolute top-4 right-4 w-48 h-36 bg-gray-700 rounded-lg border-2 border-gray-600 flex items-center justify-center">
         <div className="text-center">
-          <User className="h-12 w-12 mx-auto mb-2 text-blue-400" />
-          <p className="text-sm text-gray-300">AI Interviewer</p>
+        <img
+                src="https://d502jbuhuh9wk.cloudfront.net/logos/6677da88a7c70751b1bf34a8.png?v=1"
+                alt="Logo"
+                className="h-12 w-15 object-contain align-middle mx-auto mb-2"
+              />
+          <p className="text-l text-gray-300">AI Interviewer</p>
           {isAISpeaking && (
             <div className="mt-2">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse mx-auto"></div>
