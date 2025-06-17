@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Mic } from 'lucide-react';
 
@@ -9,7 +8,7 @@ interface TranscriptPanelProps {
 
 const TranscriptPanel = ({ transcript, isInterviewActive }: TranscriptPanelProps) => {
   return (
-    <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col">
+    <div className="w-full md:w-96 bg-gray-800 border-l border-gray-700 flex flex-col h-full min-h-[400px] max-h-full">
       <div className="p-4 border-b border-gray-700">
         <h3 className="text-lg font-semibold">Live Transcript</h3>
         <p className="text-sm text-gray-400">Real-time conversation</p>

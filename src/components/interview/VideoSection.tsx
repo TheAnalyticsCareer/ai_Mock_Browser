@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 
@@ -67,7 +66,7 @@ const VideoSection = ({
   };
 
   return (
-    <div className="flex-1 bg-gray-800 relative">
+    <div className="flex-1 bg-gray-800 relative h-full min-h-[400px] max-h-full overflow-hidden">
       <video
         ref={videoRef}
         autoPlay

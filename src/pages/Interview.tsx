@@ -279,7 +279,8 @@ const Interview = () => {
       </div>
 
       {/* Main Panels */}
-      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8 px-4 md:px-0">
+      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8 px-4 md:px-0"
+           style={{ minHeight: 520, maxHeight: 600, height: 600 }}>
         {/* Video Area */}
         <div className="flex-1 flex flex-col rounded-2xl bg-black/30 shadow-xl backdrop-blur-lg border border-gray-800/50 overflow-hidden min-h-[520px]">
           <VideoSection
