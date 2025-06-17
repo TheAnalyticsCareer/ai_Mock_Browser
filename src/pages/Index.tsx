@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -13,12 +13,25 @@ import {
   ArrowRight,
   Users,
   Award,
-  TrendingUp
+  TrendingUp,
+  Crown
 } from 'lucide-react';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const Index = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth(); // <-- add logout here
+
+  const [email, setEmail] = useState('');
+  const [open, setOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false);
+  const [adminPass, setAdminPass] = useState('');
+  const [interviews, setInterviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const features = [
     {
@@ -59,6 +72,28 @@ const Index = () => {
     }
   }, []);
 
+  const handleAdminLogin = async () => {
+  setLoading(true);
+  if (adminPass === 'admin123') {
+    if (!user) {
+      alert('Please sign in as admin to view data.');
+      setLoading(false);
+      return;
+    }
+    setAdminLoggedIn(true);
+    const snap = await getDocs(collection(db, 'interviews'));
+    setInterviews(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  } else {
+    alert('Incorrect password');
+  }
+  setLoading(false);
+};
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/'); // Stay on index page after logout
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {/* Header */}
@@ -84,10 +119,7 @@ const Index = () => {
                     Go to Dashboard
                   </Button>
                   <Button
-                    onClick={async () => {
-                      await logout();
-                      navigate('/login');
-                    }}
+                    onClick={handleLogout}
                     variant="outline"
                     className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
                   >
@@ -110,6 +142,16 @@ const Index = () => {
                   </Button>
                 </>
               )}
+              {/* Admin Button - Now inline with other buttons */}
+              <Button
+                variant="ghost"
+                className="rounded-full border border-yellow-400 text-yellow-700 hover:bg-yellow-50"
+                onClick={() => setAdminOpen(true)}
+                title="Admin Login"
+              >
+                <Crown className="h-6 w-6 mr-1" />
+                <span className="font-semibold">Admin</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -328,9 +370,6 @@ const Index = () => {
 
 
 
-     
-
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -350,6 +389,120 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Admin Dialog */}
+      <Dialog open={adminOpen} onOpenChange={setAdminOpen}>
+        <DialogTrigger asChild></DialogTrigger>
+        <DialogContent className="max-w-7xl"> {/* Increased width */}
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="h-6 w-6 text-yellow-600" />
+              Admin Panel
+            </DialogTitle>
+            <DialogDescription>
+              Login to view all interview records.
+            </DialogDescription>
+          </DialogHeader>
+          {!adminLoggedIn ? (
+            <div className="space-y-4">
+              <Input
+                type="password"
+                placeholder="Enter admin password"
+                value={adminPass}
+                onChange={e => setAdminPass(e.target.value)}
+                className="w-full"
+              />
+              <Button
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                onClick={handleAdminLogin}
+                disabled={loading}
+              >
+                {loading ? 'Logging in...' : 'Login as Admin'}
+              </Button>
+            </div>
+          ) : (
+            <div>
+              <h3 className="font-semibold mb-4 text-lg">All Interview Records</h3>
+              <div className="max-h-[600px] overflow-auto rounded-lg border border-gray-200 bg-white shadow">
+                <table className="min-w-full text-sm">
+                 
+<thead className="sticky top-0 bg-gray-100 z-10">
+  <tr>
+    <th className="p-3 text-left font-semibold">Candidate</th>
+    <th className="p-3 text-left font-semibold">Role</th>
+    <th className="p-3 text-left font-semibold">Status</th>
+    <th className="p-3 text-left font-semibold">Score</th>
+    <th className="p-3 text-left font-semibold">Date</th>
+    <th className="p-3 text-left font-semibold w-72">Transcript</th>
+    <th className="p-3 text-left font-semibold w-72">Feedback</th> {/* New column */}
+  </tr>
+</thead>
+<tbody>
+  {interviews.map((i) => (
+    <tr key={i.id} className="border-b hover:bg-gray-50">
+      <td className="p-3">{i.candidateName}</td>
+      <td className="p-3">{i.role}</td>
+      <td className="p-3">{i.status}</td>
+      <td className="p-3">{i.score ?? '-'}</td>
+      <td className="p-3">{i.createdAt ? new Date(i.createdAt).toLocaleString() : '-'}</td>
+      <td className="p-3 align-top">
+        <div
+          className="bg-gray-100 border border-gray-300 rounded p-2 max-h-32 min-h-[2.5rem] overflow-y-auto text-xs font-mono"
+          style={{ width: '18rem' }}
+        >
+          {i.transcript
+            ? typeof i.transcript === "string"
+              ? i.transcript
+              : Array.isArray(i.transcript)
+                ? i.transcript.join('\n')
+                : "-"
+            : "-"}
+        </div>
+      </td>
+
+
+      <td className="p-3 align-top">
+  <div
+    className="bg-gray-100 border border-gray-300 rounded p-2 max-h-32 min-h-[2.5rem] overflow-y-auto text-xs font-mono"
+    style={{ width: '18rem' }}
+  >
+    {i.feedback && typeof i.feedback === "object" && !Array.isArray(i.feedback) ? (
+      <div className="space-y-2">
+        {Object.entries(i.feedback).map(([key, value]) => (
+          <div key={key}>
+            <span className="font-semibold">{key}:</span>{" "}
+            <span>{value}</span>
+          </div>
+        ))}
+      </div>
+    ) : (
+      i.feedback
+        ? typeof i.feedback === "string"
+          ? i.feedback
+          : Array.isArray(i.feedback)
+            ? i.feedback.join('\n')
+            : "-"
+        : "-"
+    )}
+  </div>
+</td>
+
+
+    </tr>
+  ))}
+</tbody>
+
+                </table>
+                {interviews.length === 0 && (
+                  <div className="text-gray-500 text-center py-8">No interviews found.</div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      
     </div>
   );
 };
