@@ -29,6 +29,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
+
+    // If admin, set 100 attempts in Firestore
+    if (email === "admin@gmail.com" && password === "admin@12") {
+      const user = auth.currentUser;
+      if (user) {
+        await setDoc(doc(db, "users", user.uid), {
+          attemptsLeft: 100, // 100 attempts for admin
+          totalInterviews: 0,
+          completed: 0,
+          averageScore: 0
+        }, { merge: true });
+      }
+    }
   };
 
   const signUp = async (email: string, password: string) => {

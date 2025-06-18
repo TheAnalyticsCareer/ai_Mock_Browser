@@ -72,6 +72,43 @@ const Dashboard = () => {
       duration: '45 min',
       color: 'from-orange-500 to-red-500',
       icon: '📊'
+    },
+    // --- Add new templates below ---
+    {
+      id: '5',
+      title: 'Data Analytics',
+      role: 'Data Analyst',
+      description: 'Data analysis, Excel, SQL, Visualization, Business Insights',
+      duration: '40 min',
+      color: 'from-blue-700 to-blue-300',
+      icon: '📈'
+    },
+    {
+      id: '6',
+      title: 'ML Engineer',
+      role: 'Machine Learning Engineer',
+      description: 'ML algorithms, Python, Model Deployment, MLOps',
+      duration: '50 min',
+      color: 'from-green-700 to-green-300',
+      icon: '🤖'
+    },
+    {
+      id: '7',
+      title: 'AI Engineer',
+      role: 'AI Engineer',
+      description: 'AI systems, Deep Learning, NLP, Computer Vision',
+      duration: '55 min',
+      color: 'from-purple-700 to-purple-300',
+      icon: '🧠'
+    },
+    {
+      id: '8',
+      title: 'Manufacturing Supervisor',
+      role: 'Manufacturing Supervisor',
+      description: 'Production management, Lean, Quality control, Team leadership',
+      duration: '35 min',
+      color: 'from-yellow-700 to-yellow-300',
+      icon: '🏭'
     }
   ];
 
@@ -208,6 +245,10 @@ const Dashboard = () => {
       'Backend Developer': 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=200&fit=crop',
       'Full Stack Developer': 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=200&fit=crop',
       'Data Scientist': 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=200&fit=crop',
+      'Data Analytics': 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=200&fit=crop',
+      'ML Engineer': 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=200&fit=crop',
+      'AI Engineer': 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=200&fit=crop',
+      'Manufacturing Supervisor': 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=200&fit=crop',
     };
     return roleImages[role as keyof typeof roleImages] || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=200&fit=crop';
   };
@@ -285,7 +326,11 @@ const Dashboard = () => {
             <CardContent className="flex items-center justify-between p-6">
               <div>
                 <CardTitle className="text-lg text-yellow-800 mb-1">Attempts Left</CardTitle>
-                <div className="text-3xl font-bold text-yellow-700">{attemptsLeft}</div>
+                <div className="text-3xl font-bold text-yellow-700">
+                  <span>
+                    {attemptsLeft === -1 ? "Unlimited" : attemptsLeft}
+                  </span>
+                </div>
                 <div className="text-gray-500 text-sm">Free interview attempts remaining</div>
               </div>
               <div className="flex items-center">

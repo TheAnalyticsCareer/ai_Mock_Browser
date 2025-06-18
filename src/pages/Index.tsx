@@ -20,6 +20,9 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Input } from '@/components/ui/input';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { QRCodeSVG } from "qrcode.react";
+import { Dialog as HeadlessDialog } from "@headlessui/react";
+import emailjs from 'emailjs-com'; // Add this import at the top
 
 const Index = () => {
   const navigate = useNavigate();
@@ -32,6 +35,16 @@ const Index = () => {
   const [adminPass, setAdminPass] = useState('');
   const [interviews, setInterviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [upiModalOpen, setUpiModalOpen] = useState(false);
+  const [showTxnInput, setShowTxnInput] = useState(false);
+  const [txnId, setTxnId] = useState('');
+  const [sending, setSending] = useState(false);
+
+  // Your UPI details
+  const upiId = "savitribhatt5530@okaxis"; // Replace with your UPI ID
+  const payeeName = "Analytics Career";
+  const amount = 1; // Monthly price
+  const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR`;
 
   const features = [
     {
@@ -92,6 +105,33 @@ const Index = () => {
   const handleLogout = async () => {
     await logout();
     navigate('/'); // Stay on index page after logout
+  };
+
+  const handleMonthlyPayment = () => {
+    setUpiModalOpen(true);
+  };
+
+  // Add this function inside your component
+  const sendTxnEmail = async () => {
+    setSending(true);
+    try {
+      await emailjs.send(
+        'service_qlhd5tc', // Your Service ID
+        'template_2mbdyvr', // Your Template ID
+        {
+          to_email: 'bhattsushant4@gmail.com',
+          transaction_id: txnId,
+        },
+        'B9S3vjE_6ujpIEkI1' // Your Public Key
+      );
+      alert('Transaction ID sent successfully!');
+      setShowTxnInput(false);
+      setTxnId('');
+      setUpiModalOpen(false);
+    } catch (err) {
+      alert('Failed to send email. Please try again.');
+    }
+    setSending(false);
   };
 
   return (
@@ -337,7 +377,7 @@ const Index = () => {
         </ul>
         <Button
           className="w-full py-3 px-5 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition"
-          onClick={() => navigate('/signup')}
+          onClick={handleMonthlyPayment}
         >
           Start Monthly Plan
         </Button>
@@ -501,6 +541,55 @@ const Index = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* UPI QR Modal */}
+      <HeadlessDialog open={upiModalOpen} onClose={() => setUpiModalOpen(false)} className="fixed z-50 inset-0 overflow-y-auto">
+  <div className="flex items-center justify-center min-h-screen">
+    <HeadlessDialog.Panel className="bg-white rounded-lg p-8 shadow-lg max-w-md w-full text-center">
+      <HeadlessDialog.Title className="text-xl font-bold mb-2">Scan to Pay with UPI</HeadlessDialog.Title>
+      <p className="mb-4">Scan this QR code with any UPI app to pay ₹{amount}</p>
+      <QRCodeSVG value={upiUrl} size={200} />
+      <div className="mt-4">
+        <p className="text-sm text-gray-600 break-all">{upiUrl}</p>
+      </div>
+      <div className="mt-6 flex justify-center gap-4">
+        <button
+          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          onClick={() => {
+            setShowTxnInput(false);
+            setUpiModalOpen(false);
+          }}
+        >
+          Close
+        </button>
+        <button
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          onClick={() => setShowTxnInput(true)}
+        >
+          Paid
+        </button>
+      </div>
+      {showTxnInput && (
+        <div className="mt-6 space-y-3">
+          <input
+            type="text"
+            placeholder="Enter your UPI Transaction ID"
+            value={txnId}
+            onChange={e => setTxnId(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          />
+          <button
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={sendTxnEmail}
+            disabled={sending || !txnId}
+          >
+            {sending ? 'Sending...' : 'Submit'}
+          </button>
+        </div>
+      )}
+    </HeadlessDialog.Panel>
+  </div>
+</HeadlessDialog>
 
       
     </div>
