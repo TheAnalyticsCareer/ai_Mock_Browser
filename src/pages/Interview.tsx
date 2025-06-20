@@ -279,10 +279,10 @@ const Interview = () => {
       </div>
 
       {/* Main Panels */}
-      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8 px-4 md:px-0"
+      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8 px-2 md:px-0"
            style={{ minHeight: 520, maxHeight: 600, height: 600 }}>
         {/* Video Area */}
-        <div className="flex-1 flex flex-col rounded-2xl bg-black/30 shadow-xl backdrop-blur-lg border border-gray-800/50 overflow-hidden min-h-[520px]">
+        <div className="flex-1 flex flex-col rounded-2xl bg-black/30 shadow-xl backdrop-blur-lg border border-gray-800/50 overflow-hidden min-h-[320px] md:min-h-[520px]">
           <VideoSection
             isCameraOn={isCameraOn}
             isAISpeaking={isAISpeaking}
@@ -305,9 +305,8 @@ const Interview = () => {
             />
           </div>
         </div>
-
         {/* Transcript Panel */}
-        <div className="w-full md:w-[380px] rounded-2xl shadow-xl border border-gray-800/40 overflow-hidden bg-black/30 backdrop-blur-lg">
+        <div className="w-full md:w-[380px] rounded-2xl shadow-xl border border-gray-800/40 overflow-hidden bg-black/30 backdrop-blur-lg mt-6 md:mt-0">
           <TranscriptPanel transcript={transcript} isInterviewActive={isInterviewActive} />
         </div>
       </div>
