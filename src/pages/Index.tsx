@@ -77,7 +77,7 @@ const PRICING_PLANS = [
             "✅ Progress tracking",
         ],
         buttonText: "Get Started Free",
-        buttonOnClick: (navigate: any) => navigate('/signup'),
+        buttonOnClick: (navigate: any) => navigate('/login'), // <-- Change here
         highlighted: false,
         borderColor: "border-blue-300",
         buttonBgColor: "bg-blue-600 hover:bg-blue-700",
@@ -122,9 +122,9 @@ const PRICING_PLANS = [
         buttonBgColor: "bg-blue-600 hover:bg-blue-700",
         textColor: "text-blue-700"
     },{
-        name: "Academia / Enterprise",
+        name: "Student", // <-- Change here
         price: "",
-        frequency: "Contact-US",
+        frequency: "Customized for You",
         features: [
             "✅ Focus on Foundational Interview Skills",
             "✅ Limited Resume & Cover Letter Feedback",
@@ -132,7 +132,7 @@ const PRICING_PLANS = [
             "✅ Basic Performance Analytics",
             "✅ Access to Student Role Templates",
         ],
-        buttonText: "Get Started",
+        buttonText: "Students",
         buttonOnClick: (navigate: any) => navigate('/signup'),
         highlighted: false,
         borderColor: "border-yellow-300",
@@ -235,6 +235,7 @@ const Index = () => {
     const [sending, setSending] = useState(false);
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
     const [paymentLoading, setPaymentLoading] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<string>("Free");
 
     // Your UPI details
     const upiId = "savitribhatt5530@okaxis"; // Replace with your UPI ID
@@ -272,10 +273,14 @@ const Index = () => {
     };
 
     const handleMonthlyPayment = () => {
+        setSelectedPlan("Monthly");
         setUpiModalOpen(true);
     };
 
-    const handlePricingClick = () => setPaymentModalOpen(true);
+    const handlePricingClick = (plan: string) => {
+        setSelectedPlan(plan);
+        setPaymentModalOpen(true);
+    };
 
     const handlePaymentSubmit = async (form: any) => {
         setPaymentLoading(true);
@@ -562,7 +567,13 @@ const Index = () => {
                                 </ul>
                                 <Button
                                     className={`w-full py-3 px-5 rounded-xl text-white font-semibold transition ${plan.buttonBgColor}`}
-                                    onClick={handlePricingClick}
+                                    onClick={() => {
+                                        if (plan.name === "Free") {
+                                            navigate('/login');
+                                        } else {
+                                            handlePricingClick(plan.name);
+                                        }
+                                    }}
                                 >
                                     {plan.buttonText}
                                 </Button>
@@ -806,6 +817,7 @@ const Index = () => {
                 upiUrl={upiUrl}
                 onSubmit={handlePaymentSubmit}
                 loading={paymentLoading}
+                defaultPlan={selectedPlan}
             />
         </div>
     );

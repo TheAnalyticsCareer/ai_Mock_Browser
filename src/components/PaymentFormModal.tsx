@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -8,17 +8,23 @@ interface PaymentFormModalProps {
   upiUrl: string;
   onSubmit: (form: any) => void;
   loading?: boolean;
+  defaultPlan?: string; // <-- Add this prop
 }
 
-const PaymentFormModal = ({ open, onClose, upiUrl, onSubmit, loading }: PaymentFormModalProps) => {
+const PaymentFormModal = ({ open, onClose, upiUrl, onSubmit, loading, defaultPlan = "Free" }: PaymentFormModalProps) => {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
     mobile: "",
     experience: "",
-    plan: "Free",
+    plan: defaultPlan,
     txnId: "",
   });
+
+  // Update plan when defaultPlan changes (e.g., when user clicks a different card)
+  useEffect(() => {
+    setForm((prev) => ({ ...prev, plan: defaultPlan }));
+  }, [defaultPlan]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -62,16 +68,6 @@ const PaymentFormModal = ({ open, onClose, upiUrl, onSubmit, loading }: PaymentF
               onChange={handleChange}
               required
             />
-            <input
-              name="experience"
-              placeholder="Years of Experience"
-              type="number"
-              min={0}
-              className="w-full border rounded px-3 py-2"
-              value={form.experience}
-              onChange={handleChange}
-              required
-            />
 
             <select
               name="plan"
@@ -85,20 +81,6 @@ const PaymentFormModal = ({ open, onClose, upiUrl, onSubmit, loading }: PaymentF
               <option value="Yearly">Yearly</option>
               <option value="Student">Student</option>
             </select>
-
-            <div className="my-4">
-              <p className="mb-2">Scan to Pay with UPI</p>
-              <QRCodeSVG value={upiUrl} size={180} />
-            </div>
-
-            <input
-              name="txnId"
-              placeholder="Enter your UPI Transaction ID"
-              className="w-full border rounded px-3 py-2"
-              value={form.txnId}
-              onChange={handleChange}
-              required
-            />
 
             <button
               type="submit"
