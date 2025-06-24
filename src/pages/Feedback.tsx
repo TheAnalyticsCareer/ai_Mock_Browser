@@ -320,7 +320,21 @@ const Feedback = () => {
               </div>
             ) : (
               <div className="space-y-3 max-h-[200px] sm:max-h-[300px] overflow-y-auto">
-                {/* ... transcript rendering remains the same ... */}
+                {transcriptArr.map((line, idx) => {
+                  const isAI = line.startsWith('AI Interviewer:');
+                  return (
+                    <div
+                      key={idx}
+                      className={`rounded px-2 py-1 text-xs sm:text-sm font-mono ${
+                        isAI
+                          ? 'bg-blue-100 text-blue-900 border-l-4 border-blue-400'
+                          : 'bg-gray-100 text-gray-800 border-l-4 border-gray-400'
+                      }`}
+                    >
+                      {line}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -457,11 +471,14 @@ const Feedback = () => {
               <CardTitle className="text-base sm:text-lg">Communication Assessment</CardTitle>
             </CardHeader>
             <CardContent>
+              {feedback.interviewInsights && (
+                <p className="text-gray-700 text-sm sm:text-base mb-2">{feedback.interviewInsights}</p>
+              )}
               <p className="text-gray-700 text-sm sm:text-base">{feedback.communicationSkills}</p>
             </CardContent>
           </Card>
 
-          {/* Interview Insights */}
+          {/* Performance Insights */}
           {feedback.interviewInsights && (
             <Card>
               <CardHeader>
@@ -493,21 +510,17 @@ const Feedback = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <p className="text-gray-700 text-sm sm:text-base">{feedback.recommendations}</p>
-              
-              <div>
-                <h4 className="font-semibold text-gray-900 text-sm sm:text-base mb-2">
-                  Action Items:
-                </h4>
-                <ul className="space-y-2">
-                  {feedback.improvements.map((improvement, index) => (
-                    <li key={index} className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-gray-700 text-sm sm:text-base">{improvement}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <h4 className="font-semibold text-gray-900 text-sm sm:text-base mb-2">
+                Action Items:
+              </h4>
+              <ul className="space-y-2">
+                {feedback.improvements.map((improvement, index) => (
+                  <li key={index} className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-gray-700 text-sm sm:text-base">{improvement}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </CardContent>
         </Card>
@@ -517,9 +530,9 @@ const Feedback = () => {
           <Button
             onClick={() => navigate('/dashboard')}
             variant="outline"
-            className="text-sm sm:text-base"
+            className="w-full sm:w-auto"
           >
-            Practice More Interviews
+            Return to Dashboard
           </Button>
           <Button
             onClick={() => window.print()}

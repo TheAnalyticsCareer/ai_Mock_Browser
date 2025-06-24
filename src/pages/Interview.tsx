@@ -230,11 +230,11 @@ const Interview = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#15192c] via-[#232d4d] to-[#20202b] flex flex-col items-center justify-center transition-all duration-500">
-      {/* Modern Header */}
-      <div className="w-full max-w-6xl mx-auto mt-8 px-4">
-        <div className="flex justify-between items-center gap-4">
+ return (
+    <div className="min-h-screen overflow-y-auto bg-gradient-to-br from-[#15192c] via-[#232d4d] to-[#20202b] flex flex-col items-center justify-start transition-all duration-500">
+      {/* Header */}
+      <div className="w-full max-w-6xl mx-auto mt-6 px-4 sm:px-6">
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-4">
           <button
             className="rounded-full bg-black/30 hover:bg-black/50 p-2 transition-colors"
             onClick={() => window.history.back()}
@@ -242,32 +242,34 @@ const Interview = () => {
           >
             <ChevronLeft className="h-6 w-6 text-white" />
           </button>
-          <div className="flex items-center gap-4 flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+
+          <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
               AI Interview
-              <Badge variant="secondary" className="ml-2 px-4 py-1 text-base rounded-lg tracking-widest">
+              <Badge variant="secondary" className="ml-2 px-2 sm:px-4 py-1 text-sm sm:text-base rounded-lg tracking-widest">
                 {role}
               </Badge>
             </h1>
             {roleDescription && (
-              <p className="hidden md:block text-gray-400 ml-6 text-base">
-                {roleDescription}
-              </p>
+              <p className="text-gray-400 text-sm sm:text-base ml-0 sm:ml-6">{roleDescription}</p>
             )}
           </div>
-          <div className="flex items-center gap-4">
+
+          <div className="flex flex-wrap items-center gap-3">
             <div
               className="rounded-lg border border-gray-800 bg-gray-800/60 px-3 py-1 flex items-center gap-2 shadow-inner"
               title="Interview Duration"
             >
               <span className="font-mono text-lg text-white">{formatDuration(duration)}</span>
             </div>
+
             {isInterviewActive && (
               <div className="flex items-center gap-2 bg-red-700/60 px-2 py-1 rounded-lg animate-pulse border border-red-700 shadow-md">
                 <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-red-100">Recording</span>
               </div>
             )}
+
             {isAISpeaking && (
               <div className="flex items-center gap-2 bg-green-700/60 px-2 py-1 rounded-lg border border-green-700 shadow-md">
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
@@ -278,11 +280,10 @@ const Interview = () => {
         </div>
       </div>
 
-      {/* Main Panels */}
-      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8 px-2 md:px-0"
-           style={{ minHeight: 520, maxHeight: 600, height: 600 }}>
-        {/* Video Area */}
-        <div className="flex-1 flex flex-col rounded-2xl bg-black/30 shadow-xl backdrop-blur-lg border border-gray-800/50 overflow-hidden min-h-[320px] md:min-h-[520px]">
+      {/* Main Content */}
+      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8 px-4 sm:px-6">
+        {/* Video Section */}
+        <div className="flex-1 flex flex-col rounded-2xl bg-black/30 shadow-xl backdrop-blur-lg border border-gray-800/50 overflow-hidden min-h-[320px] md:min-h-[520px] max-h-[600px]">
           <VideoSection
             isCameraOn={isCameraOn}
             isAISpeaking={isAISpeaking}
@@ -305,12 +306,14 @@ const Interview = () => {
             />
           </div>
         </div>
+
         {/* Transcript Panel */}
         <div className="w-full md:w-[380px] rounded-2xl shadow-xl border border-gray-800/40 overflow-hidden bg-black/30 backdrop-blur-lg mt-6 md:mt-0">
           <TranscriptPanel transcript={transcript} isInterviewActive={isInterviewActive} />
         </div>
       </div>
-      {/* Subtle animated background shapes for flair */}
+
+      {/* Background Animations */}
       <div className="fixed left-8 top-40 z-0 w-60 h-60 rounded-full bg-blue-700/20 blur-2xl animate-pulse pointer-events-none" />
       <div className="fixed right-12 bottom-14 z-0 w-72 h-40 rounded-full bg-pink-500/10 blur-2xl animate-[pulse_7s_ease-in-out_infinite]" />
     </div>

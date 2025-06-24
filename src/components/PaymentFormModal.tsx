@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
-import { QRCodeSVG } from "qrcode.react";
 
 interface PaymentFormModalProps {
   open: boolean;
@@ -8,10 +7,17 @@ interface PaymentFormModalProps {
   upiUrl: string;
   onSubmit: (form: any) => void;
   loading?: boolean;
-  defaultPlan?: string; // <-- Add this prop
+  defaultPlan?: string;
 }
 
-const PaymentFormModal = ({ open, onClose, upiUrl, onSubmit, loading, defaultPlan = "Free" }: PaymentFormModalProps) => {
+const PaymentFormModal = ({
+  open,
+  onClose,
+  upiUrl,
+  onSubmit,
+  loading,
+  defaultPlan = "Free",
+}: PaymentFormModalProps) => {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -21,7 +27,6 @@ const PaymentFormModal = ({ open, onClose, upiUrl, onSubmit, loading, defaultPla
     txnId: "",
   });
 
-  // Update plan when defaultPlan changes (e.g., when user clicks a different card)
   useEffect(() => {
     setForm((prev) => ({ ...prev, plan: defaultPlan }));
   }, [defaultPlan]);
@@ -36,42 +41,56 @@ const PaymentFormModal = ({ open, onClose, upiUrl, onSubmit, loading, defaultPla
   };
 
   return (
-    <Dialog open={open} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen">
-        <Dialog.Panel className="bg-white rounded-lg p-8 shadow-lg max-w-md w-full text-center">
-          <Dialog.Title className="text-xl font-bold mb-2">Complete Your Registration</Dialog.Title>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <Dialog open={open} onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/30 p-4">
+      <Dialog.Panel className="w-full max-w-2xl bg-white rounded-xl shadow-xl p-6 sm:p-10 text-left">
+        <Dialog.Title className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          Complete Your Registration
+        </Dialog.Title>
 
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
             <input
               name="fullName"
-              placeholder="Full Name"
-              className="w-full border rounded px-3 py-2"
+              placeholder="Enter your full name"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg"
               value={form.fullName}
               onChange={handleChange}
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               name="email"
               type="email"
-              placeholder="Email"
-              className="w-full border rounded px-3 py-2"
+              placeholder="Enter your email"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg"
               value={form.email}
               onChange={handleChange}
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
             <input
               name="mobile"
               type="tel"
-              placeholder="Mobile Number"
-              className="w-full border rounded px-3 py-2"
+              placeholder="Enter your mobile number"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg"
               value={form.mobile}
               onChange={handleChange}
               required
             />
+          </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Select Plan</label>
             <select
               name="plan"
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg"
               value={form.plan}
               onChange={handleChange}
               required
@@ -79,19 +98,24 @@ const PaymentFormModal = ({ open, onClose, upiUrl, onSubmit, loading, defaultPla
               <option value="Free">Free</option>
               <option value="Monthly">Monthly</option>
               <option value="Yearly">Yearly</option>
-              <option value="Student">Student</option>
+              <option value="Student">Academia/Enterprises</option>
             </select>
+          </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
-              disabled={loading}
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
-          </form>
-        </Dialog.Panel>
-      </div>
+          {/* Optional: You can show QR Code here if needed */}
+          {/* <div className="flex justify-center">
+            <QRCodeSVG value={upiUrl} size={150} />
+          </div> */}
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold transition duration-200"
+            disabled={loading}
+          >
+            {loading ? "Submitting..." : "Submit"}
+          </button>
+        </form>
+      </Dialog.Panel>
     </Dialog>
   );
 };

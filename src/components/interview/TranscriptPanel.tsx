@@ -25,7 +25,7 @@ const TranscriptPanel = ({ transcript, isInterviewActive }: TranscriptPanelProps
       
       <div
         ref={transcriptRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3"
+        className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[350px] min-h-[200px]"
       >
         {transcript.length === 0 ? (
           <div className="text-center py-8">
