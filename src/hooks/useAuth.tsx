@@ -35,7 +35,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const user = auth.currentUser;
       if (user) {
         await setDoc(doc(db, "users", user.uid), {
-          attemptsLeft: 100, // 100 attempts for admin
+          email, // add this line
+          attemptsLeft: 100,
           totalInterviews: 0,
           completed: 0,
           averageScore: 0
@@ -46,8 +47,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // Create user profile with 5 attempts
+    // Create user profile with 5 attempts and save email
     await setDoc(doc(db, "users", userCredential.user.uid), {
+      email, // <-- Add this line
       attemptsLeft: 5,
       totalInterviews: 0,
       completed: 0,

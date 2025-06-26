@@ -85,7 +85,7 @@ const PRICING_PLANS = [
     },
     {
         name: "Monthly",
-        price: "$19",
+        price: "$9",
         frequency: "Per Month",
         features: [
             "✅ Unlimited AI interviews",
@@ -283,8 +283,17 @@ const Index = () => {
     const handlePaymentSubmit = async (form: any) => {
         setPaymentLoading(true);
         try {
+            // Map "Student" to "Academia/ Enterprises"
+            let plan = form.plan;
+            if (plan === "Student") {
+                plan = "Academia/ Enterprises";
+            }
+
+            // Prepare data without txnId and experience
+            const { txnId, experience, ...rest } = form;
             await addDoc(collection(db, "payments"), {
-                ...form,
+                ...rest,
+                plan,
                 createdAt: Timestamp.now(),
             });
             alert("Registration submitted! We'll verify your payment soon.");
