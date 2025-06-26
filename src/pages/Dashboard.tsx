@@ -11,6 +11,7 @@ import { PlusCircle, Play, Calendar, Briefcase, User, LogOut, Clock, Trophy, Tre
 import { toast } from '@/hooks/use-toast';
 import { FiPlusCircle } from "react-icons/fi";
 import CreateTemplateModal from "../components/CreateTemplateModal";
+import { Select } from '@/components/ui/select'; // If you have a custom Select component
 
 interface Interview {
   id: string;
@@ -116,6 +117,7 @@ const Dashboard = () => {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [customTemplates, setCustomTemplates] = useState<Template[]>([]);
   const [globalTemplates, setGlobalTemplates] = useState<Template[]>([]);
+  const [filterRole, setFilterRole] = useState<string>('All');
 
   // Helper to check admin
   const isAdmin = user?.email === "admin@gmail.com";
@@ -143,26 +145,25 @@ const Dashboard = () => {
   }, [user, showTemplateModal]); // refetch when modal closes (new template added)
 
   // Fetch global templates (admin-created)
- // ...existing code...
-useEffect(() => {
-  const fetchGlobalTemplates = async () => {
-    try {
-      const q = collection(db, "global_templates");
-      const querySnapshot = await getDocs(q);
-      const templatesData: Template[] = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        color: 'from-yellow-500 to-orange-300',
-        icon: '⭐',
-        isCustom: true
-      })) as Template[];
-      setGlobalTemplates(templatesData);
-    } catch (error) {
-      console.error('Error fetching global templates:', error);
-    }
-  };
-  fetchGlobalTemplates();
-}, [showTemplateModal]);
+  useEffect(() => {
+    const fetchGlobalTemplates = async () => {
+      try {
+        const q = collection(db, "global_templates");
+        const querySnapshot = await getDocs(q);
+        const templatesData: Template[] = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          color: 'from-yellow-500 to-orange-300',
+          icon: '⭐',
+          isCustom: true
+        })) as Template[];
+        setGlobalTemplates(templatesData);
+      } catch (error) {
+        console.error('Error fetching global templates:', error);
+      }
+    };
+    fetchGlobalTemplates();
+  }, [showTemplateModal]);
 
   useEffect(() => {
     fetchInterviews();
@@ -342,11 +343,19 @@ useEffect(() => {
   const averageScore = interviews.filter(i => i.score).reduce((acc, i) => acc + (i.score || 0), 0) / interviews.filter(i => i.score).length || 0;
 
   // Combine all templates
-const allTemplates = [
-  ...DEFAULT_TEMPLATES,
-  ...globalTemplates,
-  ...customTemplates // user-specific
-];
+  const allTemplates = [
+    ...DEFAULT_TEMPLATES,
+    ...globalTemplates,
+    ...customTemplates // user-specific
+  ];
+
+  // Get unique roles for dropdown options
+  const templateRoles = Array.from(new Set(allTemplates.map(t => t.role)));
+
+  // Filtered templates
+  const filteredTemplates = filterRole === 'All'
+    ? allTemplates
+    : allTemplates.filter(t => t.role === filterRole);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -495,11 +504,25 @@ const allTemplates = [
           <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
             <div>
               <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
-                Practice Templates
+                Practice Interviews
               </h3>
               <p className="text-xs sm:text-sm text-gray-600">
                 Choose your interview type and start practicing
               </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <label htmlFor="template-filter" className="text-sm text-gray-700">Filter by Role:</label>
+              <select
+                id="template-filter"
+                value={filterRole}
+                onChange={e => setFilterRole(e.target.value)}
+                className="border rounded px-2 py-1 text-sm"
+              >
+                <option value="All">All</option>
+                {templateRoles.map(role => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
             </div>
             {isAdmin && (
               <button
@@ -513,18 +536,17 @@ const allTemplates = [
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {allTemplates.map((template) => (
+            {filteredTemplates.map((template) => (
               <Card 
                 key={template.id} 
                 className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/70 backdrop-blur-sm relative"
               >
                 <CardHeader className="pb-2 sm:pb-3">
-                  <div className={`w-full h-24 sm:h-32 bg-gradient-to-r ${template.color} rounded-lg flex items-center justify-center text-3xl sm:text-4xl mb-3 sm:mb-4`}>
-                    {template.icon}
+                  <div className={`w-full h-24 sm:h-32 bg-gradient-to-r ${template.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4`}>
+                    <span className="text-base sm:text-lg md:text-xl font-bold text-white text-center px-2">
+                      {template.title}
+                    </span>
                   </div>
-                  <CardTitle className="text-base sm:text-lg md:text-xl group-hover:text-blue-600 transition-colors">
-                    {template.title}
-                  </CardTitle>
                   <div className="flex items-center space-x-1 sm:space-x-2">
                     <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
                       <Clock className="h-3 w-3 mr-1" />

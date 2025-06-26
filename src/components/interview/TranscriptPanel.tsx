@@ -17,7 +17,7 @@ const TranscriptPanel = ({ transcript, isInterviewActive }: TranscriptPanelProps
   }, [transcript]);
 
   return (
-    <div className="w-full md:w-96 bg-gray-800 border-l border-gray-700 flex flex-col h-full min-h-[400px] max-h-full">
+    <div className="w-full md:w-97 bg-gray-800 border-l border-gray-700 flex flex-col h-full min-h-[400px] max-h-full">
       <div className="p-4 border-b border-gray-700">
         <h3 className="text-lg font-semibold">Live Transcript</h3>
         <p className="text-sm text-gray-400">Real-time conversation</p>

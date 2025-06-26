@@ -188,3 +188,29 @@ export const generateFeedback = async (transcript: string, role: string, candida
     };
   }
 };
+
+export const generateInterviewerQuestion = async (conversation: string, role: string, language: 'en' | 'hi' = 'en') => {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const prompt = `
+You are an AI interviewer for a ${role} position. 
+Your job is to conduct a realistic mock interview.
+${language === 'hi'
+  ? 'Conduct the interview entirely in Hindi. All questions and instructions should be in Hindi.'
+  : 'Conduct the interview in English.'}
+- Start by asking the candidate for their full name.
+- Then ask about their years of experience and background.
+- After that, proceed to technical and behavioral questions relevant to the ${role} role.
+- Only ask one question at a time, based on the candidate's previous answer.
+- Do NOT provide feedback or evaluation until the interview is over.
+- Stay friendly, concise, and professional.
+
+Conversation so far:
+${conversation}
+
+Based on the above, what is the next question you should ask? Respond ONLY with the next question.
+`;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text().trim();
+};

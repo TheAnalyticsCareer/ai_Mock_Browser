@@ -3,13 +3,16 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
-import { useVapi } from '@/hooks/useVapi';
+import { useVoiceAI } from "@/hooks/useVoiceAI";
+import { generateFeedback, generateInterviewerQuestion } from "@/lib/gemini";
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import VideoSection from '@/components/interview/VideoSection';
 import InterviewControls from '@/components/interview/InterviewControls';
 import TranscriptPanel from '@/components/interview/TranscriptPanel';
 import { ChevronLeft } from 'lucide-react';
+import { Input } from '@/components/ui/input'; // Make sure you have this component
+import { Button } from '@/components/ui/button'; // For the send button
 
 const Interview = () => {
   const { id } = useParams();
@@ -17,6 +20,12 @@ const Interview = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
+  const { listening, transcript, startListening, stopListening, speak, resetTranscript, voices } = useVoiceAI();
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string>("");
+
+  const [conversation, setConversation] = useState<string[]>([]);
+  const [aiThinking, setAiThinking] = useState(false);
+
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,20 +33,36 @@ const Interview = () => {
   const [duration, setDuration] = useState(0);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   
+  const [isInterviewActive, setIsInterviewActive] = useState(false);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+
+  const [typedAnswer, setTypedAnswer] = useState(""); // <-- Add this state
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hi'>('en'); // Add this state
+
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
 
   const role = location.state?.role || 'Software Developer';
   const roleDescription = location.state?.roleDescription || '';
   const interviewId = location.state?.interviewId || id;
 
-  const {
-    isInterviewActive,
-    isAISpeaking,
-    connectionStatus,
-    transcript,
-    handleStartInterview: vapiStartInterview,
-    handleStopInterview: vapiStopInterview,
-  } = useVapi();
+  // Find the selected voice object, filtered by language
+  const filteredVoices = voices.filter(v =>
+    selectedLanguage === 'hi'
+      ? v.lang.toLowerCase().includes('hi') // Hindi
+      : v.lang.toLowerCase().includes('en') // English
+  );
+  const selectedVoice = filteredVoices.find(v => v.voiceURI === selectedVoiceURI) || filteredVoices[0];
+
+  // Update useVoiceAI to use correct language for STT
+  useEffect(() => {
+    if (window && (window as any).SpeechRecognition) {
+      const recognition = (window as any).recognitionRef?.current;
+      if (recognition) {
+        recognition.lang = selectedLanguage === 'hi' ? 'hi-IN' : 'en-US';
+      }
+    }
+  }, [selectedLanguage]);
 
   useEffect(() => {
     console.log('Interview component mounted');
@@ -88,43 +113,32 @@ const Interview = () => {
     }
 
     setIsLoading(true);
-    
-    try {
-      console.log('Creating interview record and starting Vapi for role:', role);
-      
-      // Create interview record first
-      await createInterviewRecord();
-      
-      // Start the Vapi interview with role information
-      const success = await vapiStartInterview(role, roleDescription);
-      
-      if (success) {
-        setInterviewStartTime(new Date());
-        
-        // Start duration timer
-        durationInterval.current = setInterval(() => {
-          setDuration(prev => prev + 1);
-        }, 1000);
-        
-        toast({
-          title: "Interview Started",
-          description: `The AI interviewer for ${role} position should start speaking shortly.`,
-        });
 
-        // Check if AI starts speaking within 10 seconds
-        setTimeout(() => {
-          console.log('Checking if AI is speaking...', { isAISpeaking, connectionStatus });
-          if (connectionStatus === 'connected' && !isAISpeaking) {
-            toast({
-              title: "AI Interviewer Ready",
-              description: `The AI interviewer for ${role} is connected. You can start speaking to begin the conversation.`,
-            });
-          }
-        }, 5000);
-        
-      } else {
-        throw new Error('Failed to start Vapi interview');
-      }
+    try {
+      await createInterviewRecord();
+      setInterviewStartTime(new Date());
+      setIsInterviewActive(true);
+      setConnectionStatus('connected');
+      setIsAISpeaking(true); // <-- fix here
+
+      // Start duration timer
+      durationInterval.current = setInterval(() => {
+        setDuration(prev => prev + 1);
+      }, 1000);
+
+      toast({
+        title: "Interview Started",
+        description: `The AI interviewer for ${role} position should start speaking shortly.`,
+      });
+
+      // Use language in AI intro
+      const aiIntro =
+        selectedLanguage === 'hi'
+          ? `नमस्ते, आपके ${role} इंटरव्यू सत्र में आपका स्वागत है। शुरू करने के लिए, कृपया अपना पूरा नाम बताएं।`
+          : `Hello, and welcome to your ${role} interview session. To begin, could you please tell me your full name?`;
+      setConversation([`AI: ${aiIntro}`]);
+      speak(aiIntro, selectedVoice);
+      setIsAISpeaking(false); // <-- fix here
     } catch (error) {
       console.error('Error starting interview:', error);
       toast({
@@ -141,47 +155,44 @@ const Interview = () => {
     setIsLoading(true);
     
     try {
-      const success = await vapiStopInterview();
-      
-      if (success || true) { // Always proceed even if stop fails
-        if (durationInterval.current) {
-          clearInterval(durationInterval.current);
-        }
-
-        console.log('Interview ended. Transcript length:', transcript.length);
-        console.log('Final transcript:', transcript);
-
-        // Update interview status in database
-        if (interviewId && user) {
-          const finalTranscript = transcript.length > 0 ? transcript.join('\n') : 'No transcript available';
-          
-          await updateDoc(doc(db, 'interviews', interviewId), {
-            status: 'completed',
-            endTime: new Date().toISOString(),
-            transcript: finalTranscript,
-            duration: duration
-          });
-          
-          console.log('Interview data saved to database');
-        }
-
-        toast({
-          title: "Interview Completed",
-          description: "Generating your feedback...",
-        });
-
-        // Navigate to feedback page with all necessary data
-        navigate(`/feedback/${interviewId}`, {
-          state: {
-            transcript: transcript.length > 0 ? transcript.join('\n') : 'Interview completed successfully',
-            role,
-            duration,
-            candidateName: user?.email || 'Candidate'
-          }
-        });
-      } else {
-        throw new Error('Failed to stop interview properly');
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
       }
+
+      setIsInterviewActive(false);
+      setConnectionStatus('disconnected');
+
+      console.log('Interview ended. Transcript length:', transcript.length);
+      console.log('Final transcript:', transcript);
+
+      // Update interview status in database
+      if (interviewId && user) {
+        const finalTranscript = transcript.length > 0 ? transcript.join('\n') : 'No transcript available';
+        
+        await updateDoc(doc(db, 'interviews', interviewId), {
+          status: 'completed',
+          endTime: new Date().toISOString(),
+          transcript: finalTranscript,
+          duration: duration
+        });
+        
+        console.log('Interview data saved to database');
+      }
+
+      toast({
+        title: "Interview Completed",
+        description: "Generating your feedback...",
+      });
+
+      // Navigate to feedback page with all necessary data
+      navigate(`/feedback/${interviewId}`, {
+        state: {
+          transcript: conversation.join('\n'),
+          role,
+          duration,
+          candidateName: user?.email || 'Candidate'
+        }
+      });
     } catch (error) {
       console.error('Error ending interview:', error);
       toast({
@@ -202,6 +213,56 @@ const Interview = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // When transcript changes and listening has stopped, handle user answer
+  useEffect(() => {
+    if (!listening && transcript.trim()) {
+      handleUserAnswer();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listening, transcript]);
+
+  const handleUserAnswer = async () => {
+    if (!transcript.trim()) return;
+    setConversation(prev => [...prev, `You: ${transcript}`]);
+    setAiThinking(true);
+
+    // Pass language to AI
+    const aiQuestion = await generateInterviewerQuestion(
+      [...conversation, `You: ${transcript}`].join('\n'),
+      role,
+      selectedLanguage
+    );
+
+    setConversation(prev => [...prev, `AI: ${aiQuestion}`]);
+    speak(aiQuestion, selectedVoice, () => {
+      setIsAISpeaking(false);
+      startListening(); // Automatically start listening after AI finishes speaking
+    });
+    resetTranscript();
+    setAiThinking(false);
+  };
+
+  const handleTextSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!typedAnswer.trim()) return;
+    setConversation(prev => [...prev, `You: ${typedAnswer}`]);
+    setAiThinking(true);
+
+    const aiQuestion = await generateInterviewerQuestion(
+      [...conversation, `You: ${typedAnswer}`].join('\n'),
+      role,
+      selectedLanguage
+    );
+
+    setConversation(prev => [...prev, `AI: ${aiQuestion}`]);
+    speak(aiQuestion, selectedVoice, () => {
+      setIsAISpeaking(false);
+      startListening(); // Automatically start listening after AI finishes speaking
+    });
+    setTypedAnswer("");
+    setAiThinking(false);
   };
 
   const toggleCamera = () => {
@@ -230,10 +291,29 @@ const Interview = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Example: After transcript is set, send to backend
+  useEffect(() => {
+    if (transcript) {
+      // Call your AI backend here, then:
+      // speak(aiResponse);
+    }
+  }, [transcript]);
+
+  const INSTRUCTIONS = [
+    "1. Make sure your camera and microphone are enabled.",
+    "2. The AI interviewer will begin by asking for your name and background.",
+    "3. Answer each question clearly. You can reply by voice or by typing.",
+    "4. Wait for the AI to finish speaking before you answer.",
+    "5. You can switch between English and Hindi before starting.",
+    "6. Click 'End Interview' when you are done.",
+    "7. After the interview, you will receive detailed AI feedback.",
+    "8. If you face any issues, refresh the page and try again.",
+  ];
+
  return (
     <div className="min-h-screen overflow-y-auto bg-gradient-to-br from-[#15192c] via-[#232d4d] to-[#20202b] flex flex-col items-center justify-start transition-all duration-500">
       {/* Header */}
-      <div className="w-full max-w-6xl mx-auto mt-6 px-4 sm:px-6">
+      <div className="w-full max-w-7xl mx-auto mt-2 px-2 sm:px-4">
         <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-4">
           <button
             className="rounded-full bg-black/30 hover:bg-black/50 p-2 transition-colors"
@@ -278,12 +358,53 @@ const Interview = () => {
             )}
           </div>
         </div>
+        {/* --- Language and Voice Selection Dropdowns --- */}
+        <div className="mt-2 flex flex-col sm:flex-row gap-2">
+          {/* --- Language Selection Dropdown --- */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="language-select" className="text-white font-semibold">
+              Interview Language:
+            </label>
+            <select
+              id="language-select"
+              value={selectedLanguage}
+              onChange={e => setSelectedLanguage(e.target.value as 'en' | 'hi')}
+              className="rounded px-2 py-1 bg-gray-800 text-white border border-gray-700"
+              style={{ minWidth: 120 }}
+              disabled={isInterviewActive}
+            >
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+            </select>
+          </div>
+
+          {/* --- Voice Selection Dropdown --- */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="voice-select" className="text-white font-semibold">
+              Select AI Voice:
+            </label>
+            <select
+              id="voice-select"
+              value={selectedVoiceURI}
+              onChange={e => setSelectedVoiceURI(e.target.value)}
+              className="rounded px-2 py-1 bg-gray-800 text-white border border-gray-700"
+              style={{ minWidth: 200 }}
+            >
+              <option value="">Default</option>
+              {voices.map(voice => (
+                <option key={voice.voiceURI} value={voice.voiceURI}>
+                  {voice.name} ({voice.lang}){voice.default ? " [Default]" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
-      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8 px-4 sm:px-6">
+      <div className="w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-6 mt-4 px-2 sm:px-4">
         {/* Video Section */}
-        <div className="flex-1 flex flex-col rounded-2xl bg-black/30 shadow-xl backdrop-blur-lg border border-gray-800/50 overflow-hidden min-h-[320px] md:min-h-[520px] max-h-[600px]">
+        <div className="flex-[2.8] flex flex-col rounded-2xl bg-black/30 shadow-2xl backdrop-blur-lg border border-gray-800/50 overflow-hidden min-h-[340px] sm:min-h-[420px] md:min-h-[600px] max-h-[900px] transition-all duration-300">
           <VideoSection
             isCameraOn={isCameraOn}
             isAISpeaking={isAISpeaking}
@@ -308,16 +429,72 @@ const Interview = () => {
         </div>
 
         {/* Transcript Panel */}
-        <div className="w-full md:w-[380px] rounded-2xl shadow-xl border border-gray-800/40 overflow-hidden bg-black/30 backdrop-blur-lg mt-6 md:mt-0">
-          <TranscriptPanel transcript={transcript} isInterviewActive={isInterviewActive} />
+        <div className="w-full sm:w-[100%] md:w-[480px] lg:w-[520px] rounded-2xl shadow-2xl border border-gray-800/40 overflow-hidden bg-black/30 backdrop-blur-lg mt-4 lg:mt-0 flex flex-col min-h-[260px] md:min-h-[340px] max-h-[900px] transition-all duration-300">
+          <TranscriptPanel transcript={conversation} isInterviewActive={isInterviewActive} />
+
+          {/* --- Add input box for text answers below transcript --- */}
+          <form
+            onSubmit={handleTextSubmit}
+            className="flex items-center gap-2 p-3 border-t border-gray-700 bg-gray-900"
+          >
+            <Input
+              type="text"
+              placeholder="Type your answer here..."
+              value={typedAnswer}
+              onChange={e => setTypedAnswer(e.target.value)}
+              disabled={!isInterviewActive || aiThinking}
+              className="flex-1"
+            />
+            <Button
+              type="submit"
+              disabled={!typedAnswer.trim() || !isInterviewActive || aiThinking}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Send
+            </Button>
+            <Button
+              type="button"
+              onClick={startListening}
+              disabled={listening || !isInterviewActive || aiThinking}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {listening ? "Listening..." : "🎤"}
+            </Button>
+          </form>
+        </div>
+
+        {/* Instructions Panel - right side */}
+        <div className="w-full sm:w-[98%] md:w-[320px] mt-4 lg:mt-0 flex flex-col">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow p-4 h-fit">
+            <h2 className="text-lg font-bold text-yellow-800 mb-2">Interview Instructions</h2>
+            <ul className="list-disc list-inside text-sm text-yellow-900 space-y-1 max-h-60 overflow-y-auto">
+              {INSTRUCTIONS.map((inst, idx) => (
+                <li key={idx}>{inst}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 
       {/* Background Animations */}
-      <div className="fixed left-8 top-40 z-0 w-60 h-60 rounded-full bg-blue-700/20 blur-2xl animate-pulse pointer-events-none" />
-      <div className="fixed right-12 bottom-14 z-0 w-72 h-40 rounded-full bg-pink-500/10 blur-2xl animate-[pulse_7s_ease-in-out_infinite]" />
+      <div className="fixed left-2 top-20 z-0 w-40 h-40 rounded-full bg-blue-700/20 blur-2xl animate-pulse pointer-events-none" />
+      <div className="fixed right-2 bottom-8 z-0 w-56 h-32 rounded-full bg-pink-500/10 blur-2xl animate-[pulse_7s_ease-in-out_infinite]" />
     </div>
   );
 };
 
 export default Interview;
+
+const speak = (text: string, selectedVoice?: SpeechSynthesisVoice, onEnd?: () => void) => {
+  if ("speechSynthesis" in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+    window.speechSynthesis.speak(utterance);
+
+    if (onEnd) {
+      utterance.onend = onEnd;
+    }
+  }
+};

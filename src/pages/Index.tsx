@@ -104,7 +104,7 @@ const PRICING_PLANS = [
     },
     {
         name: "Yearly",
-        price: "$199",
+        price: "$99",
         frequency: "Per Year",
         features: [
             "✅ Everything in Monthly",
