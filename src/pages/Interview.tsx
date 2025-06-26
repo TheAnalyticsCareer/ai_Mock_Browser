@@ -157,8 +157,9 @@ const Interview = () => {
   const handleEndInterview = async () => {
     setIsLoading(true);
 
-    // Stop any ongoing AI speech
-    if ("speechSynthesis" in window) {
+    // Stop AI speaking and listening
+    stopListening();
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
 
@@ -170,21 +171,16 @@ const Interview = () => {
       setIsInterviewActive(false);
       setConnectionStatus('disconnected');
 
-      console.log('Interview ended. Transcript length:', transcript.length);
-      console.log('Final transcript:', transcript);
-
-      // Update interview status in database
+      // Save transcript (conversation) to Firestore
       if (interviewId && user) {
-        const finalTranscript = transcript.length > 0 ? transcript.join('\n') : 'No transcript available';
-        
+        const finalTranscript = conversation.length > 0 ? conversation.join('\n') : 'No transcript available';
+
         await updateDoc(doc(db, 'interviews', interviewId), {
           status: 'completed',
           endTime: new Date().toISOString(),
           transcript: finalTranscript,
           duration: duration
         });
-        
-        console.log('Interview data saved to database');
       }
 
       toast({
@@ -192,7 +188,7 @@ const Interview = () => {
         description: "Generating your feedback...",
       });
 
-      // Navigate to feedback page with all necessary data
+      // Navigate to feedback page with transcript and details
       navigate(`/feedback/${interviewId}`, {
         state: {
           transcript: conversation.join('\n'),
@@ -208,11 +204,11 @@ const Interview = () => {
         description: "There was an issue ending the interview, but your data has been saved.",
         variant: "destructive",
       });
-      
+
       // Still navigate to feedback even if there was an error
       navigate(`/feedback/${interviewId}`, {
         state: {
-          transcript: transcript.length > 0 ? transcript.join('\n') : 'Interview completed with some technical issues',
+          transcript: conversation.length > 0 ? conversation.join('\n') : 'Interview completed with some technical issues',
           role,
           duration,
           candidateName: user?.email || 'Candidate'
@@ -473,9 +469,9 @@ const Interview = () => {
 
         {/* Instructions Panel - right side */}
         <div className="w-full sm:w-[98%] md:w-[320px] mt-4 lg:mt-0 flex flex-col">
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow p-4 h-fit">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow p-4 h-auto min-h-[180px] sm:min-h-[220px] md:min-h-[260px] lg:min-h-[320px] xl:min-h-[380px] 2xl:min-h-[420px] flex flex-col justify-start">
             <h2 className="text-lg font-bold text-yellow-800 mb-2">Interview Instructions</h2>
-            <ul className="list-disc list-inside text-sm text-yellow-900 space-y-1 max-h-60 overflow-y-auto">
+            <ul className="list-disc list-inside text-sm text-yellow-900 space-y-1">
               {INSTRUCTIONS.map((inst, idx) => (
                 <li key={idx}>{inst}</li>
               ))}

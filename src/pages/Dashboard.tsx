@@ -511,12 +511,12 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <label htmlFor="template-filter" className="text-sm text-gray-700">Filter by Role:</label>
+              <label htmlFor="template-filter" className="text-sm text-gray-700">Select the interviews:</label>
               <select
                 id="template-filter"
                 value={filterRole}
                 onChange={e => setFilterRole(e.target.value)}
-                className="border rounded px-2 py-1 text-sm"
+                className="border rounded px-2 py-1 text-sm min-w-[220px] sm:min-w-[280px] lg:min-w-[490px]" // Increased min-width
               >
                 <option value="All">All</option>
                 {templateRoles.map(role => (

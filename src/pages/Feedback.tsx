@@ -46,10 +46,15 @@ const Feedback = () => {
   const [retrying, setRetrying] = useState(false);
   const [interviewData, setInterviewData] = useState<any>(null);
 
-  const transcript = location.state?.transcript || '';
-  const role = location.state?.role || 'Software Developer';
-  const duration = location.state?.duration || 0;
-  const candidateName = location.state?.candidateName || 'Candidate';
+  // Remove this line:
+  // const transcript = location.state?.transcript || '';
+  // Instead, always use interviewData.transcript if available:
+  const role = location.state?.role || interviewData?.role || 'Software Developer';
+  const duration = location.state?.duration || interviewData?.duration || 0;
+  const candidateName = location.state?.candidateName || interviewData?.candidateName || 'Candidate';
+
+  // Always use transcript from Firestore if available
+  const transcript = interviewData?.transcript || location.state?.transcript || '';
 
   // --- Add transcript splitting logic ---
   // The transcript, as stored in the DB/location, may be a string or array.
@@ -96,49 +101,55 @@ const Feedback = () => {
   const loadFeedback = async () => {
     try {
       setLoading(true);
-      
+
       if (!id) {
         throw new Error('No interview ID provided');
       }
 
       // Get interview data from database
       const interviewDoc = await getDoc(doc(db, 'interviews', id));
-      
+
       if (interviewDoc.exists()) {
         const data = interviewDoc.data();
         setInterviewData(data);
         console.log('Interview data loaded:', data);
-        
-        // Always regenerate feedback to ensure AI-generated content
+
+        // If feedback already exists, use it and do NOT regenerate
+        if (data.feedback) {
+          setFeedback(data.feedback);
+          return;
+        }
+
+        // Only generate feedback if missing
         const transcriptToUse = data.transcript || transcript;
         const roleToUse = data.role || role;
         const candidateNameToUse = data.candidateName || candidateName;
-        
+
         if (!transcriptToUse || transcriptToUse.trim().length === 0) {
           throw new Error('No interview transcript found. AI feedback requires actual interview content to analyze.');
         }
-        
+
         console.log('Generating comprehensive AI feedback for actual interview content');
-        
+
         const feedbackData = await generateNewFeedback(transcriptToUse, roleToUse, candidateNameToUse);
-        
+
         // Save new AI-generated feedback to database
         await updateDoc(doc(db, 'interviews', id), {
           feedback: feedbackData,
           score: parseInt(feedbackData.overallRating) || 7,
           feedbackGeneratedAt: new Date().toISOString()
         });
-        
+
         setFeedback(feedbackData);
         toast({
           title: "AI Feedback Generated",
           description: "Comprehensive interview analysis completed using actual interview content!",
         });
-        
+
       } else {
         throw new Error('Interview record not found. Cannot generate AI feedback without interview data.');
       }
-      
+
     } catch (error) {
       console.error('Error loading/generating AI feedback:', error);
       toast({
