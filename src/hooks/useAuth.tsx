@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Create user profile with 5 attempts and save email
     await setDoc(doc(db, "users", userCredential.user.uid), {
       email, // <-- Add this line
-      attemptsLeft: 5,
+      attemptsLeft: 3,
       totalInterviews: 0,
       completed: 0,
       averageScore: 0

@@ -37,6 +37,11 @@ const PaymentFormModal = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Simple validation
+    if (!form.fullName || !form.email || !form.mobile || !form.plan) {
+      alert("Please fill all required fields.");
+      return;
+    }
     onSubmit(form);
   };
 

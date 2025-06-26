@@ -137,8 +137,11 @@ const Interview = () => {
           ? `नमस्ते, आपके ${role} इंटरव्यू सत्र में आपका स्वागत है। शुरू करने के लिए, कृपया अपना पूरा नाम बताएं।`
           : `Hello, and welcome to your ${role} interview session. To begin, could you please tell me your full name?`;
       setConversation([`AI: ${aiIntro}`]);
-      speak(aiIntro, selectedVoice);
-      setIsAISpeaking(false); // <-- fix here
+      speak(aiIntro, selectedVoice, () => {
+        setIsAISpeaking(false);
+        startListening(); // <-- Add this line to auto-start mic after intro
+      });
+      // setIsAISpeaking(false); // <-- Remove this line, handled in callback
     } catch (error) {
       console.error('Error starting interview:', error);
       toast({
@@ -153,7 +156,12 @@ const Interview = () => {
 
   const handleEndInterview = async () => {
     setIsLoading(true);
-    
+
+    // Stop any ongoing AI speech
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
     try {
       if (durationInterval.current) {
         clearInterval(durationInterval.current);
@@ -324,7 +332,7 @@ const Interview = () => {
           </button>
 
           <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-2">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl text-red-500 font-bold tracking-tight flex items-center gap-2">
               AI Interview
               <Badge variant="secondary" className="ml-2 px-2 sm:px-4 py-1 text-sm sm:text-base rounded-lg tracking-widest">
                 {role}

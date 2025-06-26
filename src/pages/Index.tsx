@@ -96,7 +96,7 @@ const PRICING_PLANS = [
             "✅ Email support",
         ],
         buttonText: "Start Monthly Plan",
-        buttonOnClick: (handleMonthlyPayment: () => void) => handleMonthlyPayment(),
+        buttonOnClick: (navigate: any, handlePricingClick: (plan: string) => void) => handlePricingClick("Monthly"),
         highlighted: true,
         borderColor: "border-purple-500",
         buttonBgColor: "bg-purple-600 hover:bg-purple-700",
@@ -115,7 +115,7 @@ const PRICING_PLANS = [
             "✅ 1-on-1 coaching session",
         ],
         buttonText: "Choose Yearly",
-        buttonOnClick: (navigate: any) => navigate('/signup'),
+        buttonOnClick: (navigate: any, handlePricingClick: (plan: string) => void) => handlePricingClick("Yearly"),
         highlighted: false,
         borderColor: "border-blue-300",
         buttonBgColor: "bg-blue-600 hover:bg-blue-700",
@@ -291,11 +291,11 @@ const Index = () => {
 
             // Prepare data without txnId and experience
             const { txnId, experience, ...rest } = form;
-            await addDoc(collection(db, "payments"), {
-                ...rest,
-                plan,
-                createdAt: Timestamp.now(),
-            });
+            await addDoc(collection(db, "payments_form"), {
+  ...rest,
+  plan,
+  createdAt: Timestamp.now(),
+});
             alert("Registration submitted! We'll verify your payment soon.");
         } catch (error) {
             alert("Failed to submit registration. Please try again.");
@@ -590,12 +590,10 @@ const Index = () => {
                                     onClick={() => {
                                         if (plan.name === "Free") {
                                             navigate('/login');
-                                        } else if (plan.name === "Monthly") {
-                                            handleMonthlyPayment();
-                                        } else if (plan.name === "Academia/ Enterprises") {
+                                        } else if (plan.buttonOnClick.length === 2) {
                                             plan.buttonOnClick(navigate, handlePricingClick);
                                         } else {
-                                            handlePricingClick(plan.name);
+                                            plan.buttonOnClick(navigate);
                                         }
                                     }}
                                 >
