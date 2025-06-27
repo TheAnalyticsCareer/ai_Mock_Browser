@@ -3,6 +3,7 @@ import { User, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEma
 import { auth } from '@/lib/firebase';
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { isAdminEmail } from './adminUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -29,14 +30,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
-
-    // If admin, set 100 attempts in Firestore
-    if (email === "admin@gmail.com" && password === "admin@12") {
-      const user = auth.currentUser;
-      if (user) {
+    const user = auth.currentUser;
+    if (user) {
+      // Check if user is admin by email in admins collection
+      const admin = await isAdminEmail(email);
+      if (admin) {
         await setDoc(doc(db, "users", user.uid), {
-          email, // add this line
+          email,
           attemptsLeft: 100,
+          totalInterviews: 0,
+          completed: 0,
+          averageScore: 0
+        }, { merge: true });
+      } else {
+        await setDoc(doc(db, "users", user.uid), {
+          email,
+          attemptsLeft: 3,
           totalInterviews: 0,
           completed: 0,
           averageScore: 0
@@ -47,10 +56,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // Create user profile with 5 attempts and save email
+    const admin = await isAdminEmail(email);
     await setDoc(doc(db, "users", userCredential.user.uid), {
-      email, // <-- Add this line
-      attemptsLeft: 3,
+      email,
+      attemptsLeft: admin ? 100 : 3,
       totalInterviews: 0,
       completed: 0,
       averageScore: 0

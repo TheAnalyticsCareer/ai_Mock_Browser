@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,8 @@ import { toast } from '@/hooks/use-toast';
 import { FiPlusCircle } from "react-icons/fi";
 import CreateTemplateModal from "../components/CreateTemplateModal";
 import { Select } from '@/components/ui/select'; // If you have a custom Select component
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { isAdminEmail } from '../hooks/adminUtils';
 
 interface Interview {
   id: string;
@@ -119,8 +121,23 @@ const Dashboard = () => {
   const [globalTemplates, setGlobalTemplates] = useState<Template[]>([]);
   const [filterRole, setFilterRole] = useState<string>('All');
 
-  // Helper to check admin
-  const isAdmin = user?.email === "admin@gmail.com";
+  // Helper to check admin (now checks Firestore and default admin)
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user?.email) {
+        setIsAdmin(await isAdminEmail(user.email));
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, [user]);
+
+  // Add Admin Modal State
+  const [showAddAdmin, setShowAddAdmin] = useState(false);
+  const [addAdminLoading, setAddAdminLoading] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState('');
 
   // Fetch user-created templates
   useEffect(() => {
@@ -308,6 +325,33 @@ const Dashboard = () => {
     }
   };
 
+  // Add Admin Handler (by email input)
+  const handleAddAdmin = async () => {
+    if (!newAdminEmail || !newAdminEmail.includes('@')) {
+      toast({ title: 'Error', description: 'Please enter a valid email', variant: 'destructive' });
+      return;
+    }
+    setAddAdminLoading(true);
+    try {
+      // Always allow and add admin@gmail.com
+      if (newAdminEmail === 'admin@gmail.com') {
+        await setDoc(doc(db, 'admins', 'admin@gmail.com'), { email: 'admin@gmail.com' });
+        toast({ title: 'Admin Added', description: `admin@gmail.com is now an admin.` });
+        setShowAddAdmin(false);
+        setNewAdminEmail('');
+        return;
+      }
+      await setDoc(doc(db, 'admins', newAdminEmail), { email: newAdminEmail });
+      toast({ title: 'Admin Added', description: `${newAdminEmail} is now an admin.` });
+      setShowAddAdmin(false);
+      setNewAdminEmail('');
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to add admin', variant: 'destructive' });
+    } finally {
+      setAddAdminLoading(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -419,6 +463,18 @@ const Dashboard = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6">
+        {/* Admin Panel Red Button */}
+        {isAdmin && (
+          <div className="flex justify-end mb-4">
+            <Button
+              className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded shadow-lg text-base"
+              onClick={() => setShowAddAdmin(true)}
+            >
+              Add Admin
+            </Button>
+          </div>
+        )}
+
         {/* Attempts Left Section */}
         <div className="mb-6 sm:mb-8 flex justify-center md:justify-end">
           <Card className="w-full md:w-1/2 lg:w-1/3 bg-gradient-to-r from-yellow-100 to-yellow-50 border-0 shadow-md">
@@ -516,7 +572,7 @@ const Dashboard = () => {
                 id="template-filter"
                 value={filterRole}
                 onChange={e => setFilterRole(e.target.value)}
-                className="border rounded px-2 py-1 text-sm min-w-[220px] sm:min-w-[280px] lg:min-w-[490px]" // Increased min-width
+                className="border rounded px-2 py-1 text-sm min-w-[220px] sm:min-w-[280px] lg:min-w-[490px]"
               >
                 <option value="All">All</option>
                 {templateRoles.map(role => (
@@ -525,13 +581,16 @@ const Dashboard = () => {
               </select>
             </div>
             {isAdmin && (
-              <button
-                className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm sm:text-base"
-                onClick={handleOpenTemplateModal}
-              >
-                <FiPlusCircle size={20} />
-                <span>Create Template</span>
-              </button>
+              <>
+                <button
+                  className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm sm:text-base"
+                  onClick={handleOpenTemplateModal}
+                >
+                  <FiPlusCircle size={20} />
+                  <span>Create Template</span>
+                </button>
+               
+              </>
             )}
           </div>
           
@@ -677,6 +736,62 @@ const Dashboard = () => {
             onClose={() => setShowTemplateModal(false)}
           />
         )}
+
+        {/* Add Admin Modal */}
+        {showAddAdmin && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
+      <h2 className="text-xl font-bold mb-2">Add Admin</h2>
+      <p className="mb-4 text-gray-600">Add a Gmail as admin by typing the email or signing in with Google.</p>
+      <input
+        type="email"
+        className="w-full border p-2 rounded mb-2"
+        placeholder="Enter admin email (e.g. someone@gmail.com)"
+        value={newAdminEmail}
+        onChange={e => setNewAdminEmail(e.target.value)}
+        disabled={addAdminLoading}
+      />
+      <div className="flex gap-2">
+        <Button
+          onClick={handleAddAdmin}
+          disabled={addAdminLoading}
+          className="w-1/2 bg-green-600 hover:bg-green-700 text-white"
+        >
+          {addAdminLoading ? 'Adding...' : 'Add by Email'}
+        </Button>
+        <Button
+          onClick={async () => {
+            setAddAdminLoading(true);
+            try {
+              const provider = new GoogleAuthProvider();
+              const result = await signInWithPopup(auth, provider);
+              const adminUser = result.user;
+              await setDoc(doc(db, 'admins', adminUser.email), { email: adminUser.email });
+              toast({ title: 'Admin Added', description: `${adminUser.email} is now an admin.` });
+              setShowAddAdmin(false);
+              setNewAdminEmail('');
+            } catch (error) {
+              toast({ title: 'Error', description: 'Failed to add admin', variant: 'destructive' });
+            } finally {
+              setAddAdminLoading(false);
+            }
+          }}
+          disabled={addAdminLoading}
+          className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {addAdminLoading ? 'Adding...' : 'Add by Google Sign In'}
+        </Button>
+      </div>
+      <Button
+        onClick={() => { setShowAddAdmin(false); setNewAdminEmail(''); }}
+        variant="outline"
+        className="w-full mt-2"
+      >
+        Cancel
+      </Button>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );

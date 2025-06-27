@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { db } from "../lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { isAdminEmail } from "@/hooks/adminUtils";
 
 interface Props {
   userId?: string; // allow undefined
@@ -14,8 +15,19 @@ const CreateTemplateModal = ({ userId, userEmail, onClose }: Props) => {
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const isAdmin = userEmail === "admin@gmail.com"; // Pass userEmail as a prop
+  useEffect(() => {
+    let mounted = true;
+    const checkAdmin = async () => {
+      if (userEmail) {
+        const admin = await isAdminEmail(userEmail);
+        if (mounted) setIsAdmin(admin);
+      }
+    };
+    checkAdmin();
+    return () => { mounted = false; };
+  }, [userEmail]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
