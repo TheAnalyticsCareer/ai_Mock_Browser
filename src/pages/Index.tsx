@@ -236,7 +236,7 @@ const Index = () => {
     const [selectedPlan, setSelectedPlan] = useState<string>("Free");
 
     // Your UPI details
-    const upiId = "savitribhatt5530@okaxis";
+    const upiId = "";
     const payeeName = "Analytics Career";
     const amount = 1;
     const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR`;
@@ -312,7 +312,7 @@ const Index = () => {
                 'service_qlhd5tc',
                 'template_2mbdyvr',
                 {
-                    to_email: 'bhattsushant4@gmail.com',
+                    to_email: '',
                     transaction_id: txnId,
                 },
                 'B9S3vjE_6ujpIEkI1'

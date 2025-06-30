@@ -4,6 +4,7 @@ import { auth } from '@/lib/firebase';
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { isAdminEmail } from './adminUtils';
+import { getUserAttemptsByEmail } from './subscriptionUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -32,34 +33,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await signInWithEmailAndPassword(auth, email, password);
     const user = auth.currentUser;
     if (user) {
-      // Check if user is admin by email in admins collection
-      const admin = await isAdminEmail(email);
-      if (admin) {
-        await setDoc(doc(db, "users", user.uid), {
-          email,
-          attemptsLeft: 100,
-          totalInterviews: 0,
-          completed: 0,
-          averageScore: 0
-        }, { merge: true });
-      } else {
-        await setDoc(doc(db, "users", user.uid), {
-          email,
-          attemptsLeft: 3,
-          totalInterviews: 0,
-          completed: 0,
-          averageScore: 0
-        }, { merge: true });
-      }
+      const attemptsLeft = await getUserAttemptsByEmail(email);
+      await setDoc(doc(db, "users", user.uid), {
+        email,
+        attemptsLeft,
+        totalInterviews: 0,
+        completed: 0,
+        averageScore: 0
+      }, { merge: true });
     }
   };
 
   const signUp = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const admin = await isAdminEmail(email);
+    const attemptsLeft = await getUserAttemptsByEmail(email);
     await setDoc(doc(db, "users", userCredential.user.uid), {
       email,
-      attemptsLeft: admin ? 100 : 3,
+      attemptsLeft,
       totalInterviews: 0,
       completed: 0,
       averageScore: 0

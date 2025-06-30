@@ -120,6 +120,9 @@ const Dashboard = () => {
   const [customTemplates, setCustomTemplates] = useState<Template[]>([]);
   const [globalTemplates, setGlobalTemplates] = useState<Template[]>([]);
   const [filterRole, setFilterRole] = useState<string>('All');
+  // Add missing state for toggling view all
+  const [showAllTemplates, setShowAllTemplates] = useState(false);
+  const [showAllInterviews, setShowAllInterviews] = useState(false);
 
   // Helper to check admin (now checks Firestore and default admin)
   const [isAdmin, setIsAdmin] = useState(false);
@@ -138,6 +141,12 @@ const Dashboard = () => {
   const [showAddAdmin, setShowAddAdmin] = useState(false);
   const [addAdminLoading, setAddAdminLoading] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState('');
+  // New: States for subscription modals
+  const [showMonthlyModal, setShowMonthlyModal] = useState(false);
+  const [showYearlyModal, setShowYearlyModal] = useState(false);
+  const [showAcademiaModal, setShowAcademiaModal] = useState(false);
+  const [subscriptionEmail, setSubscriptionEmail] = useState('');
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
   // Fetch user-created templates
   useEffect(() => {
@@ -352,6 +361,31 @@ const Dashboard = () => {
     }
   };
 
+  // New: Generic handler for subscription collections
+  const handleAddSubscriptionEmail = async (collectionName: string) => {
+    if (!subscriptionEmail || !subscriptionEmail.includes('@')) {
+      toast({ title: 'Error', description: 'Please enter a valid email', variant: 'destructive' });
+      return;
+    }
+    setSubscriptionLoading(true);
+    try {
+      let attempts = 0;
+      if (collectionName === 'monthly') attempts = 15;
+      else if (collectionName === 'yearly') attempts = 100;
+      else if (collectionName === 'academia_enterprises') attempts = 200;
+      await setDoc(doc(db, collectionName, subscriptionEmail), { email: subscriptionEmail, attemptsLeft: attempts });
+      toast({ title: 'Email Added', description: `${subscriptionEmail} added to ${collectionName}.` });
+      setSubscriptionEmail('');
+      if (collectionName === 'monthly') setShowMonthlyModal(false);
+      if (collectionName === 'yearly') setShowYearlyModal(false);
+      if (collectionName === 'academia_enterprises') setShowAcademiaModal(false);
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to add email', variant: 'destructive' });
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -400,6 +434,11 @@ const Dashboard = () => {
   const filteredTemplates = filterRole === 'All'
     ? allTemplates
     : allTemplates.filter(t => t.role === filterRole);
+  // Limit how many templates/interviews to show by default
+  const TEMPLATES_PREVIEW_COUNT = 4;
+  const INTERVIEWS_PREVIEW_COUNT = 4;
+  const templatesToShow = showAllTemplates ? filteredTemplates : filteredTemplates.slice(0, TEMPLATES_PREVIEW_COUNT);
+  const interviewsToShow = showAllInterviews ? interviews : interviews.slice(0, INTERVIEWS_PREVIEW_COUNT);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -465,12 +504,30 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6">
         {/* Admin Panel Red Button */}
         {isAdmin && (
-          <div className="flex justify-end mb-4">
+          <div className="flex flex-wrap justify-end mb-4 gap-2 sm:gap-3">
             <Button
-              className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded shadow-lg text-base"
+              className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded shadow-lg text-base w-full sm:w-auto"
               onClick={() => setShowAddAdmin(true)}
             >
               Add Admin
+            </Button>
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded shadow-lg text-base w-full sm:w-auto"
+              onClick={() => setShowMonthlyModal(true)}
+            >
+              Monthly
+            </Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded shadow-lg text-base w-full sm:w-auto"
+              onClick={() => setShowYearlyModal(true)}
+            >
+              Yearly
+            </Button>
+            <Button
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded shadow-lg text-base w-full sm:w-auto"
+              onClick={() => setShowAcademiaModal(true)}
+            >
+              Academia/Enterprises
             </Button>
           </div>
         )}
@@ -594,43 +651,43 @@ const Dashboard = () => {
             )}
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {filteredTemplates.map((template) => (
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {templatesToShow.map((template) => (
               <Card 
                 key={template.id} 
-                className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/70 backdrop-blur-sm relative"
+                className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/80 backdrop-blur-sm relative rounded-xl min-h-[220px] flex flex-col justify-between"
               >
                 <CardHeader className="pb-2 sm:pb-3">
-                  <div className={`w-full h-24 sm:h-32 bg-gradient-to-r ${template.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4`}>
-                    <span className="text-base sm:text-lg md:text-xl font-bold text-white text-center px-2">
+                  <div className={`w-full h-20 xs:h-24 sm:h-28 md:h-32 bg-gradient-to-r ${template.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4`}>
+                    <span className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-white text-center px-2 break-words line-clamp-2">
                       {template.title}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-1 sm:space-x-2">
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                  <div className="flex flex-wrap items-center space-x-1 sm:space-x-2">
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs flex items-center px-2 py-1">
                       <Clock className="h-3 w-3 mr-1" />
-                      {template.duration}
+                      <span className="truncate">{template.duration}</span>
                     </Badge>
                     {template.isCustom && (
-                      <Badge className="bg-pink-100 text-pink-700 text-xs">Custom</Badge>
+                      <Badge className="bg-pink-100 text-pink-700 text-xs px-2 py-1">Custom</Badge>
                     )}
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 line-clamp-2">
+                <CardContent className="flex-1 flex flex-col justify-between">
+                  <p className="text-xs xs:text-sm text-gray-600 mb-4 sm:mb-6 line-clamp-2 min-h-[2.5rem] xs:min-h-[3rem]">
                     {template.description}
                   </p>
                   <Button
                     onClick={() => startInterview(template)}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg text-xs sm:text-sm"
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg text-xs xs:text-sm py-2 rounded-lg"
                   >
-                    <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                    Start Interview
+                    <Play className="h-3 w-3 xs:h-4 xs:w-4 mr-1" />
+                    <span className="truncate">Start Interview</span>
                   </Button>
                 </CardContent>
                 {template.isCustom && isAdmin && (
                   <button
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1 bg-white/70 rounded-full shadow"
                     onClick={() => handleDeleteTemplate(template.id)}
                   >
                     <Trash2 size={16} />
@@ -639,6 +696,13 @@ const Dashboard = () => {
               </Card>
             ))}
           </div>
+          {filteredTemplates.length > TEMPLATES_PREVIEW_COUNT && (
+            <div className="flex justify-center mt-4">
+              <Button variant="outline" size="sm" onClick={() => setShowAllTemplates(v => !v)}>
+                {showAllTemplates ? 'Show Less' : 'View All'}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Recent Interviews */}
@@ -671,60 +735,69 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {interviews.map((interview) => (
-                <Card 
-                  key={interview.id} 
-                  className="group hover:shadow-lg transition-all duration-300 overflow-hidden bg-white/70 backdrop-blur-sm border-0"
-                >
-                  <div className="aspect-video w-full overflow-hidden">
-                    <img 
-                      src={getInterviewImage(interview.role)} 
-                      alt={interview.role}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <CardHeader className="pb-2 sm:pb-3">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-sm sm:text-base md:text-lg group-hover:text-blue-600">
-                        {interview.title}
-                      </CardTitle>
-                      <Badge className={`text-xs ${getStatusColor(interview.status)}`}>
-                        {interview.status}
-                      </Badge>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {interviewsToShow.map((interview) => (
+                  <Card 
+                    key={interview.id} 
+                    className="group hover:shadow-lg transition-all duration-300 overflow-hidden bg-white/70 backdrop-blur-sm border-0"
+                  >
+                    <div className="aspect-video w-full overflow-hidden">
+                      <img 
+                        src={getInterviewImage(interview.role)} 
+                        alt={interview.role}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 sm:space-y-3">
-                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                        <Briefcase className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                        <span>{interview.role}</span>
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-sm sm:text-base md:text-lg group-hover:text-blue-600">
+                          {interview.title}
+                        </CardTitle>
+                        <Badge className={`text-xs ${getStatusColor(interview.status)}`}>
+                          {interview.status}
+                        </Badge>
                       </div>
-                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                        <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                        <span>{new Date(interview.date).toLocaleDateString()}</span>
-                      </div>
-                      {interview.score && (
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 sm:space-y-3">
                         <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                          <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                          <span className="font-semibold text-green-600">{interview.score}/10</span>
+                          <Briefcase className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                          <span>{interview.role}</span>
                         </div>
+                        <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                          <span>{new Date(interview.date).toLocaleDateString()}</span>
+                        </div>
+                        {interview.score && (
+                          <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                            <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            <span className="font-semibold text-green-600">{interview.score}/10</span>
+                          </div>
+                        )}
+                      </div>
+                      {interview.status === 'completed' && (
+                        <Button
+                          onClick={() => navigate(`/feedback/${interview.id}`)}
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-3 sm:mt-4 text-xs sm:text-sm"
+                        >
+                          View Feedback
+                        </Button>
                       )}
-                    </div>
-                    {interview.status === 'completed' && (
-                      <Button
-                        onClick={() => navigate(`/feedback/${interview.id}`)}
-                        variant="outline"
-                        size="sm"
-                        className="w-full mt-3 sm:mt-4 text-xs sm:text-sm"
-                      >
-                        View Feedback
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {interviews.length > INTERVIEWS_PREVIEW_COUNT && (
+                <div className="flex justify-center mt-4">
+                  <Button variant="outline" size="sm" onClick={() => setShowAllInterviews(v => !v)}>
+                    {showAllInterviews ? 'Show Less' : 'View All'}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
         
@@ -739,59 +812,149 @@ const Dashboard = () => {
 
         {/* Add Admin Modal */}
         {showAddAdmin && (
-  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
-      <h2 className="text-xl font-bold mb-2">Add Admin</h2>
-      <p className="mb-4 text-gray-600">Add a Gmail as admin by typing the email or signing in with Google.</p>
-      <input
-        type="email"
-        className="w-full border p-2 rounded mb-2"
-        placeholder="Enter admin email (e.g. someone@gmail.com)"
-        value={newAdminEmail}
-        onChange={e => setNewAdminEmail(e.target.value)}
-        disabled={addAdminLoading}
-      />
-      <div className="flex gap-2">
-        <Button
-          onClick={handleAddAdmin}
-          disabled={addAdminLoading}
-          className="w-1/2 bg-green-600 hover:bg-green-700 text-white"
-        >
-          {addAdminLoading ? 'Adding...' : 'Add by Email'}
-        </Button>
-        <Button
-          onClick={async () => {
-            setAddAdminLoading(true);
-            try {
-              const provider = new GoogleAuthProvider();
-              const result = await signInWithPopup(auth, provider);
-              const adminUser = result.user;
-              await setDoc(doc(db, 'admins', adminUser.email), { email: adminUser.email });
-              toast({ title: 'Admin Added', description: `${adminUser.email} is now an admin.` });
-              setShowAddAdmin(false);
-              setNewAdminEmail('');
-            } catch (error) {
-              toast({ title: 'Error', description: 'Failed to add admin', variant: 'destructive' });
-            } finally {
-              setAddAdminLoading(false);
-            }
-          }}
-          disabled={addAdminLoading}
-          className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          {addAdminLoading ? 'Adding...' : 'Add by Google Sign In'}
-        </Button>
-      </div>
-      <Button
-        onClick={() => { setShowAddAdmin(false); setNewAdminEmail(''); }}
-        variant="outline"
-        className="w-full mt-2"
-      >
-        Cancel
-      </Button>
-    </div>
-  </div>
-)}
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
+              <h2 className="text-xl font-bold mb-2">Add Admin</h2>
+              <p className="mb-4 text-gray-600">Add a Gmail as admin by typing the email or signing in with Google.</p>
+              <input
+                type="email"
+                className="w-full border p-2 rounded mb-2"
+                placeholder="Enter admin email (e.g. someone@gmail.com)"
+                value={newAdminEmail}
+                onChange={e => setNewAdminEmail(e.target.value)}
+                disabled={addAdminLoading}
+              />
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAddAdmin}
+                  disabled={addAdminLoading}
+                  className="w-1/2 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {addAdminLoading ? 'Adding...' : 'Add by Email'}
+                </Button>
+                <Button
+                  onClick={async () => {
+                    setAddAdminLoading(true);
+                    try {
+                      const provider = new GoogleAuthProvider();
+                      const result = await signInWithPopup(auth, provider);
+                      const adminUser = result.user;
+                      await setDoc(doc(db, 'admins', adminUser.email), { email: adminUser.email });
+                      toast({ title: 'Admin Added', description: `${adminUser.email} is now an admin.` });
+                      setShowAddAdmin(false);
+                      setNewAdminEmail('');
+                    } catch (error) {
+                      toast({ title: 'Error', description: 'Failed to add admin', variant: 'destructive' });
+                    } finally {
+                      setAddAdminLoading(false);
+                    }
+                  }}
+                  disabled={addAdminLoading}
+                  className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {addAdminLoading ? 'Adding...' : 'Add by Google Sign In'}
+                </Button>
+              </div>
+              <Button
+                onClick={() => { setShowAddAdmin(false); setNewAdminEmail(''); }}
+                variant="outline"
+                className="w-full mt-2"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+        {/* Monthly Modal */}
+        {showMonthlyModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
+              <h2 className="text-xl font-bold mb-2">Add Monthly Email</h2>
+              <input
+                type="email"
+                className="w-full border p-2 rounded mb-2"
+                placeholder="Enter email for Monthly plan"
+                value={subscriptionEmail}
+                onChange={e => setSubscriptionEmail(e.target.value)}
+                disabled={subscriptionLoading}
+              />
+              <Button
+                onClick={() => handleAddSubscriptionEmail('monthly')}
+                disabled={subscriptionLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {subscriptionLoading ? 'Adding...' : 'Add Email'}
+              </Button>
+              <Button
+                onClick={() => { setShowMonthlyModal(false); setSubscriptionEmail(''); }}
+                variant="outline"
+                className="w-full mt-2"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+        {/* Yearly Modal */}
+        {showYearlyModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
+              <h2 className="text-xl font-bold mb-2">Add Yearly Email</h2>
+              <input
+                type="email"
+                className="w-full border p-2 rounded mb-2"
+                placeholder="Enter email for Yearly plan"
+                value={subscriptionEmail}
+                onChange={e => setSubscriptionEmail(e.target.value)}
+                disabled={subscriptionLoading}
+              />
+              <Button
+                onClick={() => handleAddSubscriptionEmail('yearly')}
+                disabled={subscriptionLoading}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                {subscriptionLoading ? 'Adding...' : 'Add Email'}
+              </Button>
+              <Button
+                onClick={() => { setShowYearlyModal(false); setSubscriptionEmail(''); }}
+                variant="outline"
+                className="w-full mt-2"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+        {/* Academia/Enterprises Modal */}
+        {showAcademiaModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
+              <h2 className="text-xl font-bold mb-2">Add Academia/Enterprises Email</h2>
+              <input
+                type="email"
+                className="w-full border p-2 rounded mb-2"
+                placeholder="Enter email for Academia/Enterprises plan"
+                value={subscriptionEmail}
+                onChange={e => setSubscriptionEmail(e.target.value)}
+                disabled={subscriptionLoading}
+              />
+              <Button
+                onClick={() => handleAddSubscriptionEmail('academia_enterprises')}
+                disabled={subscriptionLoading}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                {subscriptionLoading ? 'Adding...' : 'Add Email'}
+              </Button>
+              <Button
+                onClick={() => { setShowAcademiaModal(false); setSubscriptionEmail(''); }}
+                variant="outline"
+                className="w-full mt-2"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
