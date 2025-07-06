@@ -430,13 +430,8 @@ const Interview = () => {
               onEndInterview={handleEndInterview}
             />
           </div>
-        </div>
 
-        {/* Transcript Panel */}
-        <div className="w-full sm:w-[100%] md:w-[480px] lg:w-[520px] rounded-2xl shadow-2xl border border-gray-800/40 overflow-hidden bg-black/30 backdrop-blur-lg mt-4 lg:mt-0 flex flex-col min-h-[260px] md:min-h-[340px] max-h-[900px] transition-all duration-300">
-          <TranscriptPanel transcript={conversation} isInterviewActive={isInterviewActive} />
-
-          {/* --- Add input box for text answers below transcript --- */}
+          {/* --- Move input and mic button here, below camera/controls --- */}
           <form
             onSubmit={handleTextSubmit}
             className="flex items-center gap-2 p-3 border-t border-gray-700 bg-gray-900"
@@ -465,6 +460,11 @@ const Interview = () => {
               {listening ? "Listening..." : "🎤"}
             </Button>
           </form>
+        </div>
+
+        {/* Transcript Panel */}
+        <div className="w-full sm:w-[100%] md:w-[480px] lg:w-[520px] rounded-2xl shadow-2xl border border-gray-800/40 overflow-hidden bg-black/30 backdrop-blur-lg mt-4 lg:mt-0 flex flex-col min-h-[260px] md:min-h-[340px] max-h-[900px] transition-all duration-300">
+          <TranscriptPanel transcript={conversation} isInterviewActive={isInterviewActive} />
         </div>
 
         {/* Instructions Panel - right side */}
