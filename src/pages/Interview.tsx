@@ -469,7 +469,7 @@ const Interview = () => {
               disabled={listening || !isInterviewActive || aiThinking}
               className="bg-green-600 hover:bg-green-700"
             >
-              {listening ? "Listening..." : "🎤"}
+              {listening ? "Listening..." : "Click to Speak"}
             </Button>
           </form>
         </div>
@@ -514,3 +514,7 @@ const speak = (text: string, selectedVoice?: SpeechSynthesisVoice, onEnd?: () =>
     }
   }
 };
+
+
+
+

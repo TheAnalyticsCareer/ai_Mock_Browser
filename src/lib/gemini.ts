@@ -368,11 +368,11 @@ export const generateFeedback = async (transcript: string, role: string, candida
       // Example scoring logic based on transcript length
       if (length >= 40) return "10";
       if (length >= 30) return "9";
-      if (length >= 20) return "8";
-      if (length >= 15) return "7";
-      if (length >= 10) return "6";
-      if (length >= 5) return "5";
-      if (length >= 2) return "3";
+      if (length >= 20) return "7";
+      if (length >= 15) return "6";
+      if (length >= 10) return "5";
+      if (length >= 5) return "4";
+      if (length >= 2) return "2";
       return "1"; // Very short transcript, likely incomplete
     }
 
