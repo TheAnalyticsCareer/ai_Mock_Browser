@@ -21,7 +21,7 @@ import {
   Target,
   MessageSquare
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from "@/hooks/use-toast";
 
 interface FeedbackData {
   overallRating: string;
@@ -77,22 +77,56 @@ const Feedback = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    // Warn user if network is slow
+    if ('connection' in navigator) {
+      const connection = (navigator as any).connection;
+      if (connection && (connection.downlink < 1.5 || connection.effectiveType === '2g' || connection.saveData)) {
+        toast({
+          title: "Slow Internet Detected",
+          description: "Your network connection is slow. AI feedback may take longer than usual.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, []);
+
   const generateNewFeedback = async (transcriptData: string, roleData: string, candidateNameData: string) => {
     console.log('Generating comprehensive AI feedback with data:', { 
       transcriptLength: transcriptData?.length || 0, 
       role: roleData, 
       candidateName: candidateNameData 
     });
-    
+
     if (!transcriptData || transcriptData.trim().length === 0) {
       throw new Error('No interview transcript available for AI analysis. Please ensure the interview was properly recorded.');
     }
-    
+
+    let timeoutId: NodeJS.Timeout | null = null;
+    let slowToastId: string | null = null;
     try {
-      const feedbackData = await generateFeedback(transcriptData, roleData, candidateNameData);
+      // Show a toast if Gemini takes too long (e.g., 10 seconds)
+      const slowPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          slowToastId = toast({
+            title: "AI is taking longer than usual",
+            description: "Generating feedback... Please wait, this may take up to a minute on slow connections.",
+          }).id;
+        }, 10000); // 10 seconds
+      });
+
+      const feedbackData = await Promise.race([
+        generateFeedback(transcriptData, roleData, candidateNameData),
+        slowPromise
+      ]);
+      if (timeoutId) clearTimeout(timeoutId);
+      if (slowToastId) toast.dismiss(slowToastId);
+
       console.log('Comprehensive AI feedback generated successfully:', feedbackData);
       return feedbackData;
     } catch (error) {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (slowToastId) toast.dismiss(slowToastId);
       console.error('AI feedback generation failed:', error);
       throw error;
     }

@@ -39,6 +39,8 @@ const Interview = () => {
 
   const [typedAnswer, setTypedAnswer] = useState(""); // <-- Add this state
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hi'>('en'); // Add this state
+  const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]); // e.g., ['SQL', 'Excel', 'PowerBI']
+  const [questionsAsked, setQuestionsAsked] = useState<{ [stack: string]: number }>({});
 
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -236,7 +238,8 @@ const Interview = () => {
     const aiQuestion = await generateInterviewerQuestion(
       [...conversation, `You: ${transcript}`].join('\n'),
       role,
-      selectedLanguage
+      selectedLanguage,
+      selectedTechStacks // <-- pass this
     );
 
     setConversation(prev => [...prev, `AI: ${aiQuestion}`]);
@@ -293,6 +296,15 @@ const Interview = () => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Example: after generating a question for a stack
+  const handleNextQuestion = (stack: string) => {
+    setQuestionsAsked(prev => ({
+      ...prev,
+      [stack]: (prev[stack] || 0) + 1
+    }));
+    // ...call your AI question generator here...
   };
 
   // Example: After transcript is set, send to backend
