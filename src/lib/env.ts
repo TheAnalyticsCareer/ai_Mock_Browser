@@ -4,9 +4,9 @@
 export const env = {
   VITE_GEMINI_API_KEYS: [
     import.meta.env.VITE_GEMINI_API_KEY,
-    'AIzaSyBMLOoLEiL1XAZwm0yHBLMy6S38s6jwOGE', // Second key as fallback
+    import.meta.env.VITE_GEMINI_API_KEY_FALLBACK,
   ].filter(Boolean),
-  VITE_GEMINI_FEEDBACK_API_KEY: 'AIzaSyDtsgb7--7aS2RRVjxevR2bzfJdsY3uOtU', // Dedicated feedback key
+  VITE_GEMINI_FEEDBACK_API_KEY: import.meta.env.VITE_GEMINI_FEEDBACK_API_KEY,
 };
 
 // Validate required environment variables
