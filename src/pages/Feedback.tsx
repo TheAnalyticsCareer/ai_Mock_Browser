@@ -220,10 +220,10 @@ const Feedback = () => {
 
   const getRatingLabel = (rating: number) => {
     if (rating >= 9) return 'Excellent';
-    if (rating >= 8) return 'Very Good';
-    if (rating >= 7) return 'Good';
-    if (rating >= 6) return 'Satisfactory';
-    if (rating >= 5) return 'Needs Improvement';
+    if (rating >= 7) return 'Very Good';
+    if (rating >= 5) return 'Good';
+    if (rating >= 3) return 'Satisfactory';
+    if (rating >= 1) return 'Needs Improvement';
     return 'Poor';
   };
 

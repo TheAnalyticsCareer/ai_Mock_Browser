@@ -221,24 +221,44 @@
 
 
 
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { env } from './env';
 
-const genAI = new GoogleGenerativeAI(env.VITE_GEMINI_API_KEY);
+// Helper to get a Gemini model instance for a given key
+function getGenAI(apiKey: string) {
+  return new GoogleGenerativeAI(apiKey);
+}
+
+// Try all Gemini API keys in order, fallback if quota/exhaustion error
+async function tryGeminiAPICall(fn: (genAI: any) => Promise<any>) {
+  let lastError;
+  for (const key of env.VITE_GEMINI_API_KEYS) {
+    try {
+      const genAI = getGenAI(key);
+      return await fn(genAI);
+    } catch (err: any) {
+      lastError = err;
+      // Check for quota/exhaustion errors (Google API error codes/messages)
+      const msg = err?.message || '';
+      if (/quota|exhaust|rate|limit|429|insufficient/i.test(msg)) {
+        console.warn('Gemini API key exhausted, trying next key...');
+        continue;
+      } else {
+        // For other errors, do not fallback
+        throw err;
+      }
+    }
+  }
+  throw lastError || new Error('All Gemini API keys failed');
+}
 
 // ---------------------- Feedback Generator ----------------------
 
 export const generateFeedback = async (transcript: string, role: string, candidateName: string) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+  // Use only the dedicated feedback API key
+  const feedbackGenAI = new GoogleGenerativeAI(env.VITE_GEMINI_FEEDBACK_API_KEY);
   const cleanTranscript = transcript?.trim() || 'Interview completed successfully';
-
-  console.log('Generating feedback with:', {
-    transcriptLength: cleanTranscript.length,
-    role,
-    candidateName,
-  });
-
   const prompt = `
     You are an expert interviewer and hiring analyst.
 
@@ -275,16 +295,13 @@ export const generateFeedback = async (transcript: string, role: string, candida
   `;
 
   try {
-    console.log('Sending request to Gemini API...');
+    const model = feedbackGenAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    console.log('Sending request to Gemini API (feedback key)...');
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-
     console.log('Raw Gemini response received:', text);
-
     let jsonText = text.trim();
-
-    // Remove markdown formatting if present
     if (jsonText.includes('```json')) {
       const match = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
       if (match) jsonText = match[1].trim();
@@ -292,13 +309,11 @@ export const generateFeedback = async (transcript: string, role: string, candida
       const match = jsonText.match(/```\s*([\s\S]*?)\s*```/);
       if (match) jsonText = match[1].trim();
     }
-
     const startIndex = jsonText.indexOf('{');
     const endIndex = jsonText.lastIndexOf('}');
     if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
       jsonText = jsonText.substring(startIndex, endIndex + 1);
     }
-
     let feedbackData;
     try {
       feedbackData = JSON.parse(jsonText);
@@ -318,14 +333,11 @@ export const generateFeedback = async (transcript: string, role: string, candida
         nextSteps: "Focus on technical skill development and practice more interview scenarios.",
       };
     }
-
     const requiredFields = [
       "overallRating", "summary", "strengths", "weaknesses", 
       "improvements", "technicalSkills", "communicationSkills", "recommendations"
     ];
-
     const missingFields = requiredFields.filter(field => !feedbackData[field]);
-
     if (missingFields.length > 0) {
       console.warn('Some fields missing, using defaults for:', missingFields);
       if (!feedbackData.overallRating) feedbackData.overallRating = "7";
@@ -337,7 +349,6 @@ export const generateFeedback = async (transcript: string, role: string, candida
       if (!feedbackData.communicationSkills) feedbackData.communicationSkills = "Clear communication throughout the interview.";
       if (!feedbackData.recommendations) feedbackData.recommendations = "Focus on continued learning and skill development.";
     }
-
     if (!Array.isArray(feedbackData.strengths)) {
       feedbackData.strengths = [feedbackData.strengths || "Professional demeanor"];
     }
@@ -347,25 +358,18 @@ export const generateFeedback = async (transcript: string, role: string, candida
     if (!Array.isArray(feedbackData.improvements)) {
       feedbackData.improvements = [feedbackData.improvements || "Continue skill development"];
     }
-
     if (!feedbackData.interviewInsights) {
       feedbackData.interviewInsights = "The candidate showed good interview preparation and engagement.";
     }
     if (!feedbackData.nextSteps) {
       feedbackData.nextSteps = "Focus on areas identified for improvement and continue professional development.";
     }
-
-    // Add this scoring logic before returning feedbackData
     function getAIScore(transcript: string): string {
-      // Count the number of non-empty lines (answers + questions)
       const lines = transcript
         .split('\n')
         .map(line => line.trim())
         .filter(line => line.length > 0);
-
       const length = lines.length;
-
-      // Example scoring logic based on transcript length
       if (length >= 30) return "10";
       if (length >= 25) return "8";
       if (length >= 20) return "7";
@@ -373,14 +377,11 @@ export const generateFeedback = async (transcript: string, role: string, candida
       if (length >= 10) return "5";
       if (length >= 4) return "4";
       if (length >= 3) return "3";
-      return "1"; // Very short transcript, likely incomplete
+      return "1";
     }
-
     feedbackData.overallRating = getAIScore(transcript);
-
     console.log('Feedback validation completed successfully');
     return feedbackData;
-
   } catch (error: any) {
     console.error('Error generating feedback:', error);
     return {
@@ -433,24 +434,23 @@ Now, ask the next question according to the above rules.
 If all 15 questions have been asked, say "This concludes the technical interview. Thank you."
 `;
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-  // Try streaming for fastest response if supported
-  if (typeof model.generateContentStream === 'function' && onToken) {
-    // See: https://ai.google.dev/docs/gemini_api_overview#streaming
-    const stream = await model.generateContentStream({ contents: [{ role: 'user', parts: [{ text: prompt }] }] });
-    let fullText = '';
-    for await (const chunk of stream) {
-      const part = chunk.text();
-      if (part) {
-        fullText += part;
-        onToken(part);
+  return tryGeminiAPICall(async (genAI) => {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Try streaming for fastest response if supported
+    if (typeof model.generateContentStream === 'function' && onToken) {
+      const stream = await model.generateContentStream({ contents: [{ role: 'user', parts: [{ text: prompt }] }] });
+      let fullText = '';
+      for await (const chunk of stream) {
+        const part = chunk.text();
+        if (part) {
+          fullText += part;
+          onToken(part);
+        }
       }
+      return fullText.trim();
+    } else {
+      const result = await model.generateContent(prompt);
+      return result.response.text().trim();
     }
-    return fullText.trim();
-  } else {
-    // Fallback to normal (non-streaming) if streaming not available or no callback
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
-  }
+  });
 };
