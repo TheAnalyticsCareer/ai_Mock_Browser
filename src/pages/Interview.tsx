@@ -37,6 +37,7 @@ const Interview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hi'>('en');
   const [conversation, setConversation] = useState<string[]>([]);
   const [aiThinking, setAiThinking] = useState(false);
+  const [aiQuestionStream, setAiQuestionStream] = useState<string>("");
   const [typedAnswer, setTypedAnswer] = useState("");
   const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]);
   const [isInterviewActive, setIsInterviewActive] = useState(false);
@@ -174,18 +175,34 @@ const Interview = () => {
     if (!transcript.trim()) return;
     setConversation(prev => [...prev, `You: ${transcript}`]);
     setAiThinking(true);
-    const question = await generateInterviewerQuestion(
+    setAiQuestionStream("");
+    let fullQuestion = "";
+    let firstTokenReceived = false;
+    const timeout = setTimeout(() => {
+      if (!firstTokenReceived) setAiQuestionStream("...");
+    }, 300);
+    await generateInterviewerQuestion(
       [...conversation, `You: ${transcript}`].join('\n'),
       role,
       selectedLanguage,
-      selectedTechStacks
+      selectedTechStacks,
+      (token) => {
+        if (!firstTokenReceived) {
+          firstTokenReceived = true;
+          clearTimeout(timeout);
+        }
+        fullQuestion += token;
+        setAiQuestionStream(fullQuestion);
+      }
     );
-    setConversation(prev => [...prev, `AI: ${question}`]);
-    speak(question, selectedVoice, () => {
+    clearTimeout(timeout);
+    setConversation(prev => [...prev, `AI: ${fullQuestion.trim()}`]);
+    speak(fullQuestion.trim(), selectedVoice, () => {
       setIsAISpeaking(false);
       startListening();
     });
     resetTranscript();
+    setAiQuestionStream("");
     setAiThinking(false);
   };
 
@@ -194,17 +211,34 @@ const Interview = () => {
     if (!typedAnswer.trim()) return;
     setConversation(prev => [...prev, `You: ${typedAnswer}`]);
     setAiThinking(true);
-    const question = await generateInterviewerQuestion(
+    setAiQuestionStream("");
+    let fullQuestion = "";
+    let firstTokenReceived = false;
+    const timeout = setTimeout(() => {
+      if (!firstTokenReceived) setAiQuestionStream("...");
+    }, 300);
+    await generateInterviewerQuestion(
       [...conversation, `You: ${typedAnswer}`].join('\n'),
       role,
-      selectedLanguage
+      selectedLanguage,
+      selectedTechStacks,
+      (token) => {
+        if (!firstTokenReceived) {
+          firstTokenReceived = true;
+          clearTimeout(timeout);
+        }
+        fullQuestion += token;
+        setAiQuestionStream(fullQuestion);
+      }
     );
-    setConversation(prev => [...prev, `AI: ${question}`]);
-    speak(question, selectedVoice, () => {
+    clearTimeout(timeout);
+    setConversation(prev => [...prev, `AI: ${fullQuestion.trim()}`]);
+    speak(fullQuestion.trim(), selectedVoice, () => {
       setIsAISpeaking(false);
       startListening();
     });
     setTypedAnswer("");
+    setAiQuestionStream("");
     setAiThinking(false);
   };
 
@@ -325,7 +359,7 @@ const Interview = () => {
         </div>
 
         <div className="w-full md:w-[480px] lg:w-[400px] rounded-2xl bg-black/30">
-          <TranscriptPanel transcript={conversation} isInterviewActive={isInterviewActive} />
+          <TranscriptPanel transcript={aiQuestionStream ? [...conversation, `AI: ${aiQuestionStream}`] : conversation} isInterviewActive={isInterviewActive} />
         </div>
 
         <div className="w-full lg:w-[300px] mt-4 lg:mt-0 flex flex-col">

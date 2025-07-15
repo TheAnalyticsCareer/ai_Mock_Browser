@@ -436,18 +436,26 @@ If all 15 questions have been asked, say "This concludes the technical interview
 
   return tryGeminiAPICall(async (genAI) => {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    // Try streaming for fastest response if supported
     if (typeof model.generateContentStream === 'function' && onToken) {
       const stream = await model.generateContentStream({ contents: [{ role: 'user', parts: [{ text: prompt }] }] });
-      let fullText = '';
-      for await (const chunk of stream) {
-        const part = chunk.text();
-        if (part) {
-          fullText += part;
-          onToken(part);
+      // Check if stream is async iterable
+      if (stream && typeof stream[Symbol.asyncIterator] === 'function') {
+        let fullText = '';
+        for await (const chunk of stream) {
+          const part = chunk.text();
+          if (part) {
+            fullText += part;
+            onToken(part);
+          }
         }
+        return fullText.trim();
+      } else {
+        // Not async iterable, fallback to non-streaming
+        const result = await model.generateContent(prompt);
+        const text = result.response.text().trim();
+        onToken(text); // send all at once
+        return text;
       }
-      return fullText.trim();
     } else {
       const result = await model.generateContent(prompt);
       return result.response.text().trim();
