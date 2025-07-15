@@ -35,7 +35,7 @@ const DASHBOARD_TEMPLATES = [
     title: 'Frontend Developer',
     role: 'Frontend Developer',
     description: 'React, JavaScript, CSS, HTML, UI/UX principles',
-    duration: '30 min',
+    duration: '15 min',
     color: 'from-blue-500 to-cyan-500',
   },
   {
@@ -43,7 +43,7 @@ const DASHBOARD_TEMPLATES = [
     title: 'Backend Developer',
     role: 'Backend Developer',
     description: 'Node.js, APIs, Databases, System Design',
-    duration: '45 min',
+    duration: '15 min',
     color: 'from-green-500 to-emerald-500',
   },
   {
@@ -51,7 +51,7 @@ const DASHBOARD_TEMPLATES = [
     title: 'Full Stack Developer',
     role: 'Full Stack Developer',
     description: 'Frontend + Backend technologies, Architecture',
-    duration: '60 min',
+    duration: '15 min',
     color: 'from-purple-500 to-violet-500',
   },
   {
@@ -59,7 +59,7 @@ const DASHBOARD_TEMPLATES = [
     title: 'Data Scientist',
     role: 'Data Scientist',
     description: 'Python, Machine Learning, Statistics, SQL',
-    duration: '45 min',
+    duration: '15 min',
     color: 'from-orange-500 to-red-500',
   },
   {
@@ -67,7 +67,7 @@ const DASHBOARD_TEMPLATES = [
     title: 'Data Analytics',
     role: 'Data Analyst',
     description: 'Data analysis, Excel, SQL, Visualization, Business Insights',
-    duration: '40 min',
+    duration: '15 min',
     color: 'from-blue-700 to-blue-300',
   },
   {
@@ -75,7 +75,7 @@ const DASHBOARD_TEMPLATES = [
     title: 'ML Engineer',
     role: 'Machine Learning Engineer',
     description: 'ML algorithms, Python, Model Deployment, MLOps',
-    duration: '50 min',
+    duration: '15 min',
     color: 'from-green-700 to-green-300',
   },
   {
@@ -83,7 +83,7 @@ const DASHBOARD_TEMPLATES = [
     title: 'AI Engineer',
     role: 'AI Engineer',
     description: 'AI systems, Deep Learning, NLP, Computer Vision',
-    duration: '55 min',
+    duration: '15 min',
     color: 'from-purple-700 to-purple-300',
   },
   {
@@ -91,7 +91,7 @@ const DASHBOARD_TEMPLATES = [
     title: 'Manufacturing Supervisor',
     role: 'Manufacturing Supervisor',
     description: 'Production management, Lean, Quality control, Team leadership',
-    duration: '35 min',
+    duration: '15 min',
     color: 'from-yellow-700 to-yellow-300',
   }
 ];
@@ -554,90 +554,100 @@ const Index = () => {
             </section>
 
 
-            {/* Practice Interviews Section (Dashboard Style) */}
-            <section className="py-12 sm:py-16 lg:py-20 bg-white">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
-                        <div>
-                            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
-                                Practice Interviews
-                            </h3>
-                            <p className="text-xs sm:text-sm text-gray-600">
-                                Choose your interview type and start practicing
-                            </p>
+          {/* Practice Interviews Section (Dashboard Style) */}
+<section
+    className="py-12 sm:py-16 lg:py-20 relative overflow-hidden"
+>
+    {/* Background Blur */}
+    <div
+        className="absolute inset-0 bg-white"
+        style={{
+            backgroundImage: 'url(https://t4.ftcdn.net/jpg/04/84/11/15/360_F_484111532_W0WOkKeXQzF75XusA7R8e3llIDXqyCFm.jpg)',
+            backgroundSize: 'auto',
+            filter: 'blur(4px)', // Adjust blur intensity as needed
+        }}
+    />
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
+            <div>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-red-100 mb-1 sm:mb-2">
+                    Practice Interviews
+                </h3>
+
+            </div>
+            <div className="flex items-center gap-2">
+                <label htmlFor="template-filter-index" className="text-sm text-gray-700">Select the interviews:</label>
+                <select
+                    id="template-filter-index"
+                    value={filterRoleIndex}
+                    onChange={e => setFilterRoleIndex(e.target.value)}
+                    className="border rounded px-2 py-1 text-sm min-w-[220px] sm:min-w-[280px] lg:min-w-[490px]"
+                >
+                    <option value="All">All</option>
+                    {templateRolesIndex.map(role => (
+                        <option key={role} value={role}>{role}</option>
+                    ))}
+                </select>
+            </div>
+        </div>
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {templatesToShowIndex.map((template, idx) => (
+                <Card
+                    key={template.id}
+                    className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/80 backdrop-blur-sm relative rounded-xl min-h-[220px] flex flex-col justify-between"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }} // White with slight transparency
+                >
+                    <CardHeader className="pb-2 sm:pb-3">
+                        <div className={`w-full h-20 xs:h-24 sm:h-28 md:h-32 bg-gradient-to-r ${template.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4`}>
+                            <span className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-white text-center px-2 break-words line-clamp-2">
+                                {template.title}
+                            </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <label htmlFor="template-filter-index" className="text-sm text-gray-700">Select the interviews:</label>
-                            <select
-                                id="template-filter-index"
-                                value={filterRoleIndex}
-                                onChange={e => setFilterRoleIndex(e.target.value)}
-                                className="border rounded px-2 py-1 text-sm min-w-[220px] sm:min-w-[280px] lg:min-w-[490px]"
-                            >
-                                <option value="All">All</option>
-                                {templateRolesIndex.map(role => (
-                                    <option key={role} value={role}>{role}</option>
-                                ))}
-                            </select>
+                        <div className="flex flex-wrap items-center space-x-1 sm:space-x-2">
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs flex items-center px-2 py-1">
+                                <Clock className="h-3 w-3 mr-1" />
+                                <span className="truncate">{template.duration}</span>
+                            </Badge>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                        {templatesToShowIndex.map((template, idx) => (
-                            <Card
-                                key={template.id}
-                                className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/80 backdrop-blur-sm relative rounded-xl min-h-[220px] flex flex-col justify-between"
-                            >
-                                <CardHeader className="pb-2 sm:pb-3">
-                                    <div className={`w-full h-20 xs:h-24 sm:h-28 md:h-32 bg-gradient-to-r ${template.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4`}>
-                                        <span className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-white text-center px-2 break-words line-clamp-2">
-                                            {template.title}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-wrap items-center space-x-1 sm:space-x-2">
-                                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs flex items-center px-2 py-1">
-                                            <Clock className="h-3 w-3 mr-1" />
-                                            <span className="truncate">{template.duration}</span>
-                                        </Badge>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="flex-1 flex flex-col justify-between">
-                                    <p className="text-xs xs:text-sm text-gray-600 mb-4 sm:mb-6 line-clamp-2 min-h-[2.5rem] xs:min-h-[3rem]">
-                                        {template.description}
-                                    </p>
-                                    <Button
-                                        onClick={() => navigate('/signup')}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg text-xs xs:text-sm py-2 rounded-lg"
-                                    >
-                                        <Play className="h-3 w-3 xs:h-4 xs:w-4 mr-1" />
-                                        <span className="truncate">Start Interview</span>
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                    {filteredTemplatesIndex.length > TEMPLATES_PREVIEW_COUNT_INDEX && (
-                        <div className="flex justify-center mt-4">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                    if (showAllTemplatesIndex) {
-                                        setShowAllTemplatesIndex(false);
-                                    } else {
-                                        if (user) {
-                                            navigate('/dashboard');
-                                        } else {
-                                            navigate('/login');
-                                        }
-                                    }
-                                }}
-                            >
-                                {showAllTemplatesIndex ? 'Show Less' : 'View All'}
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </section>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col justify-between">
+                        <p className="text-xs xs:text-sm text-gray-600 mb-4 sm:mb-6 line-clamp-2 min-h-[2.5rem] xs:min-h-[3rem]">
+                            {template.description}
+                        </p>
+                        <Button
+                            onClick={() => navigate('/signup')}
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg text-xs xs:text-sm py-2 rounded-lg"
+                        >
+                            <Play className="h-3 w-3 xs:h-4 xs:w-4 mr-1" />
+                            <span className="truncate">Start Interview</span>
+                        </Button>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+        {filteredTemplatesIndex.length > TEMPLATES_PREVIEW_COUNT_INDEX && (
+            <div className="flex justify-center mt-4">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        if (showAllTemplatesIndex) {
+                            setShowAllTemplatesIndex(false);
+                        } else {
+                            if (user) {
+                                navigate('/dashboard');
+                            } else {
+                                navigate('/login');
+                            }
+                        }
+                    }}
+                >
+                    {showAllTemplatesIndex ? 'Show Less' : 'View All'}
+                </Button>
+            </div>
+        )}
+    </div>
+</section>
 
             {/* Features Section
             <section className="py-12 sm:py-16 lg:py-20 bg-gray-100">
@@ -732,53 +742,63 @@ const Index = () => {
                 </div>
                 
             </section>
-            {/* Pricing Section */}
-            <section id="pricing" className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-50 to-purple-100">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center mb-6 sm:mb-8 bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
-                        Choose Your Plan
-                    </h2>
-                    <p className="text-center text-gray-600 mb-8 sm:mb-12 text-sm sm:text-base">
-                        Start for free, or upgrade for unlimited AI interview practice
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                        {PRICING_PLANS.map((plan, index) => (
-                            <div
-                                key={index}
-                                className={`rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border relative hover:shadow-xl transition-all duration-300 ${plan.borderColor} ${plan.highlighted ? 'border-2 sm:border-4 scale-[1.02] sm:scale-105' : ''}`}
-                            >
-                                {plan.highlighted && (
-                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow">
-                                        Most Popular
-                                    </span>
-                                )}
-                                <h3 className={`text-xl sm:text-2xl font-semibold mb-2 text-left ${plan.textColor}`}>{plan.name}</h3>
-                                <div className="text-3xl sm:text-4xl font-bold mb-1 text-left">{plan.price}</div>
-                                <div className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 text-left">{plan.frequency}</div>
-                                <ul className="text-gray-700 mb-6 sm:mb-8 space-y-1 sm:space-y-2 text-xs sm:text-sm text-left leading-relaxed">
-                                    {plan.features.map((feature, i) => (
-                                        <li key={i} dangerouslySetInnerHTML={{ __html: feature }} />
-                                    ))}
-                                </ul>
-                                <Button
-                                    className={`w-full py-2 sm:py-3 px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition ${plan.buttonBgColor}`}
-                                    onClick={() => {
-                                        if (plan.name === "Free") {
-                                            navigate('/login');
-                                        } else if (plan.buttonOnClick.length === 2) {
-                                            plan.buttonOnClick(navigate, handlePricingClick);
-                                        } else {
-                                            plan.buttonOnClick(navigate);
-                                        }
-                                    }}
-                                >
-                                    {plan.buttonText}
-                                </Button>
-                            </div>
+           <section
+    id="pricing"
+    className="py-12 sm:py-16 lg:py-20 relative overflow-hidden"
+>
+    {/* Background Blur */}
+    <div
+        className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-100"
+        style={{
+            backgroundImage: 'url(https://ts2.mm.bing.net/th?id=OIP.C46XsoZnzZUQMwSS4cpfNwHaEK&pid=15.1)',
+            backgroundSize: 'auto',
+            filter: 'blur(4px)', // Adjust blur intensity as needed
+        }}
+    />
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10"> {/* Added relative and z-10 to bring content forward */}
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center mb-6 sm:mb-8 bg-gradient-to-r from-red-700 to-yellow-200 bg-clip-text text-transparent">
+            Choose Your Plan
+        </h2>
+     
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {PRICING_PLANS.map((plan, index) => (
+                <div
+                    key={index}
+                    className={`rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border relative hover:shadow-xl transition-all duration-300 ${plan.borderColor} ${plan.highlighted ? 'border-2 sm:border-4 scale-[1.02] sm:scale-105' : ''}`}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }} // White with slight transparency for better readability over blur
+                >
+                    {plan.highlighted && (
+                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow">
+                            Most Popular
+                        </span>
+                    )}
+                    <h3 className={`text-xl sm:text-2xl font-semibold mb-2 text-left ${plan.textColor}`}>{plan.name}</h3>
+                    <div className="text-3xl sm:text-4xl font-bold mb-1 text-left">{plan.price}</div>
+                    <div className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 text-left">{plan.frequency}</div>
+                    <ul className="text-gray-700 mb-6 sm:mb-8 space-y-1 sm:space-y-2 text-xs sm:text-sm text-left leading-relaxed">
+                        {plan.features.map((feature, i) => (
+                            <li key={i} dangerouslySetInnerHTML={{ __html: feature }} />
                         ))}
-                    </div>
+                    </ul>
+                    <Button
+                        className={`w-full py-2 sm:py-3 px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition ${plan.buttonBgColor}`}
+                        onClick={() => {
+                            if (plan.name === "Free") {
+                                navigate('/login');
+                            } else if (plan.buttonOnClick.length === 2) {
+                                plan.buttonOnClick(navigate, handlePricingClick);
+                            } else {
+                                plan.buttonOnClick(navigate);
+                            }
+                        }}
+                    >
+                        {plan.buttonText}
+                    </Button>
                 </div>
-            </section>
+            ))}
+        </div>
+    </div>
+</section>
 
             {/* Call to Action Section
             <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-100 to-blue-200">

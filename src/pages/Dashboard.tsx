@@ -41,7 +41,7 @@ const DEFAULT_TEMPLATES: Template[] = [
     title: 'Frontend Developer',
     role: 'Frontend Developer',
     description: 'React, JavaScript, CSS, HTML, UI/UX principles',
-    duration: '30 min',
+    duration: '15 min',
     color: 'from-blue-500 to-cyan-500',
     icon: '💻'
   },
@@ -50,7 +50,7 @@ const DEFAULT_TEMPLATES: Template[] = [
     title: 'Backend Developer',
     role: 'Backend Developer',
     description: 'Node.js, APIs, Databases, System Design',
-    duration: '45 min',
+    duration: '15 min',
     color: 'from-green-500 to-emerald-500',
     icon: '⚙️'
   },
@@ -59,7 +59,7 @@ const DEFAULT_TEMPLATES: Template[] = [
     title: 'Full Stack Developer',
     role: 'Full Stack Developer',
     description: 'Frontend + Backend technologies, Architecture',
-    duration: '60 min',
+    duration: '15 min',
     color: 'from-purple-500 to-violet-500',
     icon: '🚀'
   },
@@ -68,7 +68,7 @@ const DEFAULT_TEMPLATES: Template[] = [
     title: 'Data Scientist',
     role: 'Data Scientist',
     description: 'Python, Machine Learning, Statistics, SQL',
-    duration: '45 min',
+    duration: '15 min',
     color: 'from-orange-500 to-red-500',
     icon: '📊'
   },
@@ -77,7 +77,7 @@ const DEFAULT_TEMPLATES: Template[] = [
     title: 'Data Analytics',
     role: 'Data Analyst',
     description: 'Data analysis, Excel, SQL, Visualization, Business Insights',
-    duration: '40 min',
+    duration: '15 min',
     color: 'from-blue-700 to-blue-300',
     icon: '📈'
   },
@@ -86,7 +86,7 @@ const DEFAULT_TEMPLATES: Template[] = [
     title: 'ML Engineer',
     role: 'Machine Learning Engineer',
     description: 'ML algorithms, Python, Model Deployment, MLOps',
-    duration: '50 min',
+    duration: '15 min',
     color: 'from-green-700 to-green-300',
     icon: '🤖'
   },
@@ -95,7 +95,7 @@ const DEFAULT_TEMPLATES: Template[] = [
     title: 'AI Engineer',
     role: 'AI Engineer',
     description: 'AI systems, Deep Learning, NLP, Computer Vision',
-    duration: '55 min',
+    duration: '15 min',
     color: 'from-purple-700 to-purple-300',
     icon: '🧠'
   },
@@ -104,7 +104,7 @@ const DEFAULT_TEMPLATES: Template[] = [
     title: 'Manufacturing Supervisor',
     role: 'Manufacturing Supervisor',
     description: 'Production management, Lean, Quality control, Team leadership',
-    duration: '35 min',
+    duration: '15 min',
     color: 'from-yellow-700 to-yellow-300',
     icon: '🏭'
   }
@@ -441,7 +441,13 @@ const Dashboard = () => {
   const interviewsToShow = showAllInterviews ? interviews : interviews.slice(0, INTERVIEWS_PREVIEW_COUNT);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div
+      className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50"
+      style={{
+        background: 'linear-gradient(135deg, #d7e4ffff 0%, #d8f3fcff 100%)',
+        minHeight: '100vh',
+      }}
+    >
       {/* Responsive Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-4">
