@@ -400,21 +400,22 @@ export const generateFeedback = async (transcript: string, role: string, candida
 
 // ---------------------- Question Generator ----------------------
 
+
+// Only send the last few turns of the conversation to speed up Gemini response
+// Streaming version for faster incremental question display
+// onToken callback is called with each new token as it arrives (optional)
 export const generateInterviewerQuestion = async (
   conversation: string,
   role: string,
   language: 'en' | 'hi' = 'en',
-  techStacks: string[] = []
+  techStacks: string[] = [],
+  onToken?: (token: string) => void
 ) => {
-  // Count how many questions have been asked for each stack
-  // You can parse the conversation to count per stack, or keep a counter in state
+  // Split conversation into turns and keep only the last 6 (3 Q&A pairs)
+  const turns = conversation.split('\n').filter(Boolean);
+  const lastTurns = turns.slice(-6).join('\n');
 
-  // Calculate how many questions per stack
   const totalQuestions = 15;
-  const perStack = Math.floor(totalQuestions / (techStacks.length || 1));
-  const remainder = totalQuestions % (techStacks.length || 1);
-
-  // Build prompt
   let prompt = `
 You are an AI interviewer for a ${role} position.
 First, ask the candidate about their total years of experience and the main domains or technologies they've worked with.
@@ -425,14 +426,31 @@ Divide a total of 15 questions equally among the selected tech stacks: ${techSta
 Always relate your questions to the candidate's stated experience and background.
 Ask only one question at a time and wait for the user's answer before proceeding.
 
-Here is the conversation so far:
-${conversation}
+Here is the recent conversation so far:
+${lastTurns}
 
 Now, ask the next question according to the above rules.
 If all 15 questions have been asked, say "This concludes the technical interview. Thank you."
 `;
 
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  const result = await model.generateContent(prompt);
-  return result.response.text().trim();
+
+  // Try streaming for fastest response if supported
+  if (typeof model.generateContentStream === 'function' && onToken) {
+    // See: https://ai.google.dev/docs/gemini_api_overview#streaming
+    const stream = await model.generateContentStream({ contents: [{ role: 'user', parts: [{ text: prompt }] }] });
+    let fullText = '';
+    for await (const chunk of stream) {
+      const part = chunk.text();
+      if (part) {
+        fullText += part;
+        onToken(part);
+      }
+    }
+    return fullText.trim();
+  } else {
+    // Fallback to normal (non-streaming) if streaming not available or no callback
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  }
 };

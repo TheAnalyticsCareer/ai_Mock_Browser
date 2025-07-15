@@ -25,6 +25,79 @@ import { Dialog as HeadlessDialog } from "@headlessui/react";
 import emailjs from 'emailjs-com';
 import Footer from "@/components/ui/Footer";
 import PaymentFormModal from "@/components/PaymentFormModal";
+import { Clock, Play } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+
+// Dashboard-style Practice Interviews section data
+const DASHBOARD_TEMPLATES = [
+  {
+    id: '1',
+    title: 'Frontend Developer',
+    role: 'Frontend Developer',
+    description: 'React, JavaScript, CSS, HTML, UI/UX principles',
+    duration: '30 min',
+    color: 'from-blue-500 to-cyan-500',
+  },
+  {
+    id: '2',
+    title: 'Backend Developer',
+    role: 'Backend Developer',
+    description: 'Node.js, APIs, Databases, System Design',
+    duration: '45 min',
+    color: 'from-green-500 to-emerald-500',
+  },
+  {
+    id: '3',
+    title: 'Full Stack Developer',
+    role: 'Full Stack Developer',
+    description: 'Frontend + Backend technologies, Architecture',
+    duration: '60 min',
+    color: 'from-purple-500 to-violet-500',
+  },
+  {
+    id: '4',
+    title: 'Data Scientist',
+    role: 'Data Scientist',
+    description: 'Python, Machine Learning, Statistics, SQL',
+    duration: '45 min',
+    color: 'from-orange-500 to-red-500',
+  },
+  {
+    id: '5',
+    title: 'Data Analytics',
+    role: 'Data Analyst',
+    description: 'Data analysis, Excel, SQL, Visualization, Business Insights',
+    duration: '40 min',
+    color: 'from-blue-700 to-blue-300',
+  },
+  {
+    id: '6',
+    title: 'ML Engineer',
+    role: 'Machine Learning Engineer',
+    description: 'ML algorithms, Python, Model Deployment, MLOps',
+    duration: '50 min',
+    color: 'from-green-700 to-green-300',
+  },
+  {
+    id: '7',
+    title: 'AI Engineer',
+    role: 'AI Engineer',
+    description: 'AI systems, Deep Learning, NLP, Computer Vision',
+    duration: '55 min',
+    color: 'from-purple-700 to-purple-300',
+  },
+  {
+    id: '8',
+    title: 'Manufacturing Supervisor',
+    role: 'Manufacturing Supervisor',
+    description: 'Production management, Lean, Quality control, Team leadership',
+    duration: '35 min',
+    color: 'from-yellow-700 to-yellow-300',
+  }
+];
+
+const TEMPLATES_PREVIEW_COUNT_INDEX = 4;
+const templateRolesIndex = Array.from(new Set(DASHBOARD_TEMPLATES.map(t => t.role)));
 
 // Constants for names and content
 const HERO_TITLE_PART1 = "Master Your";
@@ -217,6 +290,14 @@ const HOW_IT_WORKS_CONTENT = [
 ];
 
 const Index = () => {
+
+    // Dashboard-style Practice Interviews section state
+    const [filterRoleIndex, setFilterRoleIndex] = useState('All');
+    const [showAllTemplatesIndex, setShowAllTemplatesIndex] = useState(false);
+    const filteredTemplatesIndex = filterRoleIndex === 'All'
+      ? DASHBOARD_TEMPLATES
+      : DASHBOARD_TEMPLATES.filter(t => t.role === filterRoleIndex);
+    const templatesToShowIndex = showAllTemplatesIndex ? filteredTemplatesIndex : filteredTemplatesIndex.slice(0, TEMPLATES_PREVIEW_COUNT_INDEX);
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
@@ -395,14 +476,22 @@ const Index = () => {
                 </div>
                 
             </header>
-            {/* Hero Section */}
-            <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-100 to-purple-100">
-                <div className="max-w-7xl mx-auto text-center">
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
+            {/* Hero Section with full background AI image */}
+            <section
+                className="relative py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
+                style={{
+                    backgroundImage: 'url(https://miro.medium.com/v2/resize:fit:1200/1*RZjK3Nh7JBsLtXPR3jXe9g.png)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                }}
+            >
+                <div className="relative z-10 max-w-7xl mx-auto text-center bg-white/70 rounded-2xl p-6 sm:p-10 shadow-xl backdrop-blur-sm">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 drop-shadow-lg">
                         {HERO_TITLE_PART1}
                         <span className="text-blue-600">{HERO_TITLE_PART2}</span>
                     </h2>
-                    <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto">
+                    <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto drop-shadow">
                         {HERO_DESCRIPTION}
                     </p>
 
@@ -410,12 +499,12 @@ const Index = () => {
                         <Button
                             onClick={() => navigate(user ? '/dashboard' : '/signup')}
                             size="lg"
-                            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-sm sm:text-base px-6 py-3 rounded-full"
+                            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-sm sm:text-base px-6 py-3 rounded-full shadow-xl"
                         >
                             Start Practicing Now
                             <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                         </Button>
-                        <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-600">
+                        <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-600 bg-white/80 px-2 py-1 rounded-full shadow">
                             <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500 fill-current" />
                             <span>{FREE_TO_START_MESSAGE}</span>
                         </div>
@@ -424,15 +513,15 @@ const Index = () => {
                     {/* Stats */}
                     <div className="grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12 px-4">
                         <div className="text-center">
-                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 mb-1 sm:mb-2">10K+</div>
+                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-700 mb-1 sm:mb-2 drop-shadow">10K+</div>
                             <div className="text-xs sm:text-sm text-gray-600">Interviews Practiced</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-600 mb-1 sm:mb-2">95%</div>
+                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-700 mb-1 sm:mb-2 drop-shadow">95%</div>
                             <div className="text-xs sm:text-sm text-gray-600">Success Rate</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-600 mb-1 sm:mb-2">50+</div>
+                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-700 mb-1 sm:mb-2 drop-shadow">50+</div>
                             <div className="text-xs sm:text-sm text-gray-600">Job Roles</div>
                         </div>
                     </div>
@@ -464,7 +553,93 @@ const Index = () => {
                 </div>
             </section>
 
-            {/* Features Section */}
+
+            {/* Practice Interviews Section (Dashboard Style) */}
+            <section className="py-12 sm:py-16 lg:py-20 bg-white">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
+                        <div>
+                            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+                                Practice Interviews
+                            </h3>
+                            <p className="text-xs sm:text-sm text-gray-600">
+                                Choose your interview type and start practicing
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label htmlFor="template-filter-index" className="text-sm text-gray-700">Select the interviews:</label>
+                            <select
+                                id="template-filter-index"
+                                value={filterRoleIndex}
+                                onChange={e => setFilterRoleIndex(e.target.value)}
+                                className="border rounded px-2 py-1 text-sm min-w-[220px] sm:min-w-[280px] lg:min-w-[490px]"
+                            >
+                                <option value="All">All</option>
+                                {templateRolesIndex.map(role => (
+                                    <option key={role} value={role}>{role}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                        {templatesToShowIndex.map((template, idx) => (
+                            <Card
+                                key={template.id}
+                                className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/80 backdrop-blur-sm relative rounded-xl min-h-[220px] flex flex-col justify-between"
+                            >
+                                <CardHeader className="pb-2 sm:pb-3">
+                                    <div className={`w-full h-20 xs:h-24 sm:h-28 md:h-32 bg-gradient-to-r ${template.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4`}>
+                                        <span className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-white text-center px-2 break-words line-clamp-2">
+                                            {template.title}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center space-x-1 sm:space-x-2">
+                                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs flex items-center px-2 py-1">
+                                            <Clock className="h-3 w-3 mr-1" />
+                                            <span className="truncate">{template.duration}</span>
+                                        </Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-1 flex flex-col justify-between">
+                                    <p className="text-xs xs:text-sm text-gray-600 mb-4 sm:mb-6 line-clamp-2 min-h-[2.5rem] xs:min-h-[3rem]">
+                                        {template.description}
+                                    </p>
+                                    <Button
+                                        onClick={() => navigate('/signup')}
+                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg text-xs xs:text-sm py-2 rounded-lg"
+                                    >
+                                        <Play className="h-3 w-3 xs:h-4 xs:w-4 mr-1" />
+                                        <span className="truncate">Start Interview</span>
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                    {filteredTemplatesIndex.length > TEMPLATES_PREVIEW_COUNT_INDEX && (
+                        <div className="flex justify-center mt-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    if (showAllTemplatesIndex) {
+                                        setShowAllTemplatesIndex(false);
+                                    } else {
+                                        if (user) {
+                                            navigate('/dashboard');
+                                        } else {
+                                            navigate('/login');
+                                        }
+                                    }
+                                }}
+                            >
+                                {showAllTemplatesIndex ? 'Show Less' : 'View All'}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* Features Section
             <section className="py-12 sm:py-16 lg:py-20 bg-gray-100">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 sm:mb-16">
@@ -497,7 +672,7 @@ const Index = () => {
                         ))}
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             {/* Benefits Section */}
             <section className="py-12 sm:py-16 lg:py-20 bg-white">
@@ -605,7 +780,7 @@ const Index = () => {
                 </div>
             </section>
 
-            {/* Call to Action Section */}
+            {/* Call to Action Section
             <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-100 to-blue-200">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-6 sm:mb-8">Ready to Ace Your Next Interview?</h2>
@@ -621,7 +796,7 @@ const Index = () => {
                         <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                     </Button>
                 </div>
-            </section>
+            </section> */}
 
             {/* Rating & Reviews Section */}
             <section className="py-12 sm:py-16 lg:py-20 bg-gray-100 overflow-hidden">

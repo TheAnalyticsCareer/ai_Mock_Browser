@@ -121,15 +121,9 @@ export const useVapi = () => {
     
     try {
       const success = await startInterview(undefined, role, roleDescription);
-      
       if (success) {
         console.log('Interview started successfully - waiting for AI to speak');
-        // Give a moment for the connection to establish
-        setTimeout(() => {
-          if (!isAISpeaking) {
-            console.log('AI should have started speaking by now');
-          }
-        }, 3000);
+        // Removed unnecessary artificial delay for faster experience
         return true;
       } else {
         throw new Error('Failed to start interview');
