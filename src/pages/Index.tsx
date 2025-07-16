@@ -476,57 +476,51 @@ const Index = () => {
                 </div>
                 
             </header>
-            {/* Hero Section with full background AI image */}
-            <section
-                className="relative py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
-                style={{
-                    backgroundImage: 'url(https://miro.medium.com/v2/resize:fit:1200/1*RZjK3Nh7JBsLtXPR3jXe9g.png)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                }}
-            >
-                <div className="relative z-10 max-w-7xl mx-auto text-center bg-white/70 rounded-2xl p-6 sm:p-10 shadow-xl backdrop-blur-sm">
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 drop-shadow-lg">
-                        {HERO_TITLE_PART1}
-                        <span className="text-blue-600">{HERO_TITLE_PART2}</span>
-                    </h2>
-                    <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto drop-shadow">
-                        {HERO_DESCRIPTION}
-                    </p>
+            {/* Hero Section with simple white background */}
+<section
+  className="relative py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-white"
+>
+  <div className="relative z-10 max-w-7xl mx-auto text-center rounded-2xl p-6 sm:p-10 shadow-xl">
+    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 drop-shadow-lg">
+      {HERO_TITLE_PART1}
+      <span className="text-blue-600">{HERO_TITLE_PART2}</span>
+    </h2>
+    <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto drop-shadow">
+      {HERO_DESCRIPTION}
+    </p>
 
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12">
-                        <Button
-                            onClick={() => navigate(user ? '/dashboard' : '/signup')}
-                            size="lg"
-                            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-sm sm:text-base px-6 py-3 rounded-full shadow-xl"
-                        >
-                            Start Practicing Now
-                            <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                        </Button>
-                        <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-600 bg-white/80 px-2 py-1 rounded-full shadow">
-                            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500 fill-current" />
-                            <span>{FREE_TO_START_MESSAGE}</span>
-                        </div>
-                    </div>
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12">
+      <Button
+        onClick={() => navigate(user ? '/dashboard' : '/signup')}
+        size="lg"
+        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-sm sm:text-base px-6 py-3 rounded-full shadow-xl"
+      >
+        Start Practicing Now
+        <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+      </Button>
+      <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-600 bg-white px-2 py-1 rounded-full shadow">
+        <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500 fill-current" />
+        <span>{FREE_TO_START_MESSAGE}</span>
+      </div>
+    </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12 px-4">
-                        <div className="text-center">
-                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-700 mb-1 sm:mb-2 drop-shadow">10K+</div>
-                            <div className="text-xs sm:text-sm text-gray-600">Interviews Practiced</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-700 mb-1 sm:mb-2 drop-shadow">95%</div>
-                            <div className="text-xs sm:text-sm text-gray-600">Success Rate</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-700 mb-1 sm:mb-2 drop-shadow">50+</div>
-                            <div className="text-xs sm:text-sm text-gray-600">Job Roles</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    {/* Stats */}
+    <div className="grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12 px-4">
+      <div className="text-center">
+        <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-700 mb-1 sm:mb-2 drop-shadow">10K+</div>
+        <div className="text-xs sm:text-sm text-gray-600">Interviews Practiced</div>
+      </div>
+      <div className="text-center">
+        <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-700 mb-1 sm:mb-2 drop-shadow">95%</div>
+        <div className="text-xs sm:text-sm text-gray-600">Success Rate</div>
+      </div>
+      <div className="text-center">
+        <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-700 mb-1 sm:mb-2 drop-shadow">50+</div>
+        <div className="text-xs sm:text-sm text-gray-600">Job Roles</div>
+      </div>
+    </div>
+  </div>
+</section>
 
             {/* How It Works Section */}
             <section className="py-12 sm:py-16 lg:py-20 bg-white">
@@ -554,26 +548,14 @@ const Index = () => {
             </section>
 
 
-          {/* Practice Interviews Section (Dashboard Style) */}
-<section
-    className="py-12 sm:py-16 lg:py-20 relative overflow-hidden"
->
-    {/* Background Blur */}
-    <div
-        className="absolute inset-0 bg-white"
-        style={{
-            backgroundImage: 'url(https://t4.ftcdn.net/jpg/04/84/11/15/360_F_484111532_W0WOkKeXQzF75XusA7R8e3llIDXqyCFm.jpg)',
-            backgroundSize: 'auto',
-            filter: 'blur(4px)', // Adjust blur intensity as needed
-        }}
-    />
+{/* Practice Interviews Section (Dashboard Style) */}
+<section className="py-12 sm:py-16 lg:py-20 relative overflow-hidden bg-white">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
             <div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-red-100 mb-1 sm:mb-2">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">
                     Practice Interviews
                 </h3>
-
             </div>
             <div className="flex items-center gap-2">
                 <label htmlFor="template-filter-index" className="text-sm text-gray-700">Select the interviews:</label>
@@ -590,12 +572,12 @@ const Index = () => {
                 </select>
             </div>
         </div>
+
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {templatesToShowIndex.map((template, idx) => (
                 <Card
                     key={template.id}
-                    className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/80 backdrop-blur-sm relative rounded-xl min-h-[220px] flex flex-col justify-between"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }} // White with slight transparency
+                    className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white relative rounded-xl min-h-[220px] flex flex-col justify-between"
                 >
                     <CardHeader className="pb-2 sm:pb-3">
                         <div className={`w-full h-20 xs:h-24 sm:h-28 md:h-32 bg-gradient-to-r ${template.color} rounded-lg flex items-center justify-center mb-3 sm:mb-4`}>
@@ -625,6 +607,7 @@ const Index = () => {
                 </Card>
             ))}
         </div>
+
         {filteredTemplatesIndex.length > TEMPLATES_PREVIEW_COUNT_INDEX && (
             <div className="flex justify-center mt-4">
                 <Button
@@ -648,7 +631,6 @@ const Index = () => {
         )}
     </div>
 </section>
-
             {/* Features Section
             <section className="py-12 sm:py-16 lg:py-20 bg-gray-100">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -742,64 +724,55 @@ const Index = () => {
                 </div>
                 
             </section>
-           <section
-    id="pricing"
-    className="py-12 sm:py-16 lg:py-20 relative overflow-hidden"
+           
+<section
+  id="pricing"
+  className="py-12 sm:py-16 lg:py-20 relative overflow-hidden bg-white"
 >
-    {/* Background Blur */}
-    <div
-        className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-100"
-        style={{
-            backgroundImage: 'url(https://ts2.mm.bing.net/th?id=OIP.C46XsoZnzZUQMwSS4cpfNwHaEK&pid=15.1)',
-            backgroundSize: 'auto',
-            filter: 'blur(4px)', // Adjust blur intensity as needed
-        }}
-    />
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10"> {/* Added relative and z-10 to bring content forward */}
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center mb-6 sm:mb-8 bg-gradient-to-r from-red-700 to-yellow-200 bg-clip-text text-transparent">
-            Choose Your Plan
-        </h2>
-     
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {PRICING_PLANS.map((plan, index) => (
-                <div
-                    key={index}
-                    className={`rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border relative hover:shadow-xl transition-all duration-300 ${plan.borderColor} ${plan.highlighted ? 'border-2 sm:border-4 scale-[1.02] sm:scale-105' : ''}`}
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }} // White with slight transparency for better readability over blur
-                >
-                    {plan.highlighted && (
-                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow">
-                            Most Popular
-                        </span>
-                    )}
-                    <h3 className={`text-xl sm:text-2xl font-semibold mb-2 text-left ${plan.textColor}`}>{plan.name}</h3>
-                    <div className="text-3xl sm:text-4xl font-bold mb-1 text-left">{plan.price}</div>
-                    <div className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 text-left">{plan.frequency}</div>
-                    <ul className="text-gray-700 mb-6 sm:mb-8 space-y-1 sm:space-y-2 text-xs sm:text-sm text-left leading-relaxed">
-                        {plan.features.map((feature, i) => (
-                            <li key={i} dangerouslySetInnerHTML={{ __html: feature }} />
-                        ))}
-                    </ul>
-                    <Button
-                        className={`w-full py-2 sm:py-3 px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition ${plan.buttonBgColor}`}
-                        onClick={() => {
-                            if (plan.name === "Free") {
-                                navigate('/login');
-                            } else if (plan.buttonOnClick.length === 2) {
-                                plan.buttonOnClick(navigate, handlePricingClick);
-                            } else {
-                                plan.buttonOnClick(navigate);
-                            }
-                        }}
-                    >
-                        {plan.buttonText}
-                    </Button>
-                </div>
-            ))}
-        </div>
-    </div>
-</section>
+  <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center mb-6 sm:mb-8 bg-gradient-to-r from-red-700 to-yellow-200 bg-clip-text text-transparent">
+      Choose Your Plan
+    </h2>
 
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+      {PRICING_PLANS.map((plan, index) => (
+        <div
+          key={index}
+          className={`rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border relative hover:shadow-xl transition-all duration-300 ${plan.borderColor} ${plan.highlighted ? 'border-2 sm:border-4 scale-[1.02] sm:scale-105' : ''}`}
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)' }} // Optional slight transparency
+        >
+          {plan.highlighted && (
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow">
+              Most Popular
+            </span>
+          )}
+          <h3 className={`text-xl sm:text-2xl font-semibold mb-2 text-left ${plan.textColor}`}>{plan.name}</h3>
+          <div className="text-3xl sm:text-4xl font-bold mb-1 text-left">{plan.price}</div>
+          <div className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 text-left">{plan.frequency}</div>
+          <ul className="text-gray-700 mb-6 sm:mb-8 space-y-1 sm:space-y-2 text-xs sm:text-sm text-left leading-relaxed">
+            {plan.features.map((feature, i) => (
+              <li key={i} dangerouslySetInnerHTML={{ __html: feature }} />
+            ))}
+          </ul>
+          <Button
+            className={`w-full py-2 sm:py-3 px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition ${plan.buttonBgColor}`}
+            onClick={() => {
+              if (plan.name === "Free") {
+                navigate('/login');
+              } else if (plan.buttonOnClick.length === 2) {
+                plan.buttonOnClick(navigate, handlePricingClick);
+              } else {
+                plan.buttonOnClick(navigate);
+              }
+            }}
+          >
+            {plan.buttonText}
+          </Button>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
             {/* Call to Action Section
             <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-100 to-blue-200">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
