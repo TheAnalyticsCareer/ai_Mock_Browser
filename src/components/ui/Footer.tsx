@@ -95,6 +95,12 @@ const Footer = () => (
             <span>Terms of Service</span>
           </Link>
           <Link
+            to="/refund"
+            className="hover:text-blue-300 transition flex items-center space-x-2"
+          >
+            <span>Refund Policy</span>
+          </Link>
+          <Link
             to="/contact"
             className="hover:text-blue-300 transition flex items-center space-x-2"
           >
@@ -103,23 +109,24 @@ const Footer = () => (
         </nav>
       </div>
 
-      {/* Column 4: Newsletter */}
+      {/* Column 4: Follow Us */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold mb-2">
-          Subscribe to our Newsletter
+          Follow us on LinkedIn
         </h3>
         <p className="text-gray-400 text-sm">
           Stay updated with the latest interview tips and platform updates.
         </p>
         <div className="mt-2">
-          <input
-            type="email"
-            className="bg-gray-800 border border-gray-700 rounded-md py-2 px-4 w-full text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Your email address"
-          />
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md py-2 w-full mt-2 transition">
-            Subscribe
-          </button>
+          <a
+            href="https://www.linkedin.com/company/analyticscareer/posts/?feedView=all"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md py-2 w-full flex justify-center items-center transition"
+          >
+            <Linkedin className="h-5 w-5 mr-2" />
+            Follow on LinkedIn
+          </a>
         </div>
       </div>
     </div>
