@@ -7,7 +7,7 @@ import { doc, getDoc } from 'firebase/firestore';
  * Now fetches attemptsLeft from the user's document if available, so attempts persist across logins.
  */
 export const getUserAttemptsByEmail = async (uid: string, email: string): Promise<number> => {
-  if (!email) return 3;
+  if (!email) return 100000;
   if (email === 'admin@gmail.com') return 100000;
 
   // Check user document for attemptsLeft first (by UID)
